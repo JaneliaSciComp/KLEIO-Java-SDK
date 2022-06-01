@@ -1,5 +1,5 @@
-buid
-.gradle
 .idea
 out
-build
+.jython_cache/
+target/
+
