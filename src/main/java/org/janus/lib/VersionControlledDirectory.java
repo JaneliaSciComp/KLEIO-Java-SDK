@@ -3,9 +3,9 @@ package org.janus.lib;
 
 import com.jcraft.jsch.Session;
 import org.apache.commons.io.FilenameUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TransportConfigCallback;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.Transport;
@@ -34,17 +34,19 @@ public class VersionControlledDirectory {
 
     public static VersionControlledDirectory cloneFrom(RemoteDirectory remoteDirectory, String targetDirectory) throws GitAPIException, IOException {
         File targetPath;
-        if (new File(targetDirectory).exists()) {
+        if (new File(targetDirectory).exists())
             targetPath = new File(targetDirectory, FilenameUtils.getBaseName(remoteDirectory.getPath()));
-            System.out.println(targetPath);
-        } else {
+        else
             targetPath = new File(targetDirectory);
-        }
+
         System.out.println("Target Path: " + targetPath.getAbsolutePath());
         try {
-            TransportConfigCallback transportConfigCallback = new SshTransportConfigCallback(remoteDirectory.getPassword());
-            Git.cloneRepository().setDirectory(targetPath).setTransportConfigCallback(transportConfigCallback)
+            TransportConfigCallback transportConfigCallback = new SSHTransportConfigCallback(remoteDirectory.getPassword());
+            Git git = Git.cloneRepository().setDirectory(targetPath).setTransportConfigCallback(transportConfigCallback)
                     .setURI(remoteDirectory.getUri()).call();
+            StoredConfig cfg = git.getRepository().getConfig();
+            cfg.setString("user", null, "name", remoteDirectory.getUsername());
+            cfg.save();
         } catch (GitAPIException e) {
             System.out.println("Couldn't clone :" + remoteDirectory.getUri());
             throw e;
@@ -64,7 +66,25 @@ public class VersionControlledDirectory {
 
     }
 
-    private static class SshTransportConfigCallback implements TransportConfigCallback {
+    public void addAll() throws GitAPIException {
+        AddCommand add = git.add();
+        add.addFilepattern(".");
+        add.call();
+    }
+
+    public void commit(String message) throws GitAPIException {
+        CommitCommand commit = git.commit();
+        commit.setMessage(message).call();
+    }
+
+    public void push(byte[] password) throws GitAPIException {
+        PushCommand pushCommand = git.push();
+        TransportConfigCallback transportConfigCallback = new SSHTransportConfigCallback(password);
+        pushCommand.setTransportConfigCallback(transportConfigCallback);
+        pushCommand.call();
+    }
+
+    private static class SSHTransportConfigCallback implements TransportConfigCallback {
         private final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
             @Override
             protected void configure(OpenSshConfig.Host hc, Session session) {
@@ -74,7 +94,7 @@ public class VersionControlledDirectory {
         };
         private final byte[] password;
 
-        public SshTransportConfigCallback(byte[] password) {
+        public SSHTransportConfigCallback(byte[] password) {
             this.password = password;
         }
 
