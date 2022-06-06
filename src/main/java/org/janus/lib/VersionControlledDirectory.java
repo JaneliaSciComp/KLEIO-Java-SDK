@@ -2,6 +2,7 @@ package org.janus.lib;
 
 
 import com.jcraft.jsch.Session;
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -12,25 +13,57 @@ import org.eclipse.jgit.transport.ssh.jsch.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.ssh.jsch.OpenSshConfig;
 
 import java.io.File;
+import java.io.IOException;
 
 public class VersionControlledDirectory {
+    private final String path;
+    private final Git git;
 
-    private static final String REMOTE_URL = "zouinkhim@c13u06.int.janelia.org:/groups/scicompsoft/home/zouinkhim/test_versioned";
-    final String path;
-
-    public VersionControlledDirectory(String path) {
+    private VersionControlledDirectory(String path) throws IOException {
         this.path = path;
-        if (new File(path).exists()){
+        this.git = Git.open(new File(path));
+    }
 
+    public static VersionControlledDirectory open(String path) throws IOException {
+        return new VersionControlledDirectory(path);
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public static VersionControlledDirectory cloneFrom(RemoteDirectory remoteDirectory, String targetDirectory) throws GitAPIException, IOException {
+        File targetPath;
+        if (new File(targetDirectory).exists()) {
+            targetPath = new File(targetDirectory, FilenameUtils.getBaseName(remoteDirectory.getPath()));
+            System.out.println(targetPath);
+        } else {
+            targetPath = new File(targetDirectory);
         }
+        System.out.println("Target Path: " + targetPath.getAbsolutePath());
+        try {
+            TransportConfigCallback transportConfigCallback = new SshTransportConfigCallback(remoteDirectory.getPassword());
+            Git.cloneRepository().setDirectory(targetPath).setTransportConfigCallback(transportConfigCallback)
+                    .setURI(remoteDirectory.getUri()).call();
+        } catch (GitAPIException e) {
+            System.out.println("Couldn't clone :" + remoteDirectory.getUri());
+            throw e;
+        }
+        return new VersionControlledDirectory(targetPath.getAbsolutePath());
     }
 
-    public static void main(String[] args) throws GitAPIException {
-        byte[] password = args[0].getBytes();
-        TransportConfigCallback transportConfigCallback = new SshTransportConfigCallback(password);
-        Git git = Git.cloneRepository().setDirectory(new File("./hello")).setTransportConfigCallback(transportConfigCallback)
-                .setURI(REMOTE_URL).call();
+    public static void main(String[] args) throws GitAPIException, IOException {
+        RemoteDirectory remoteDirectory = new RemoteDirectory("c13u06.int.janelia.org",
+                "/groups/scicompsoft/home/zouinkhim/test_versioned")
+                .setUsername("zouinkhim")
+                .setPassword(args[0].getBytes());
+        System.out.println(remoteDirectory.getUri());
+
+        VersionControlledDirectory versionControlledDirectory = VersionControlledDirectory.cloneFrom(remoteDirectory, new File("").getAbsolutePath());
+        System.out.println(versionControlledDirectory.getPath());
+
     }
+
     private static class SshTransportConfigCallback implements TransportConfigCallback {
         private final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
             @Override
@@ -50,9 +83,5 @@ public class VersionControlledDirectory {
             SshTransport sshTransport = (SshTransport) transport;
             sshTransport.setSshSessionFactory(sshSessionFactory);
         }
-    }
-
-    private void init() throws GitAPIException {
-        Git git = Git.init().setDirectory(new File(path)).call();
     }
 }
