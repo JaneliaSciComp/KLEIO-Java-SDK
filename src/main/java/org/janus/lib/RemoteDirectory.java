@@ -26,6 +26,10 @@ public class RemoteDirectory {
         return username;
     }
 
+    public String getHost() {
+        return host;
+    }
+
     public byte[] getPassword() {
         if (password == null || password.length == 0)
             throw new NullPointerException("Password missing!");
