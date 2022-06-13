@@ -63,7 +63,6 @@ public class VersionControlledDirectory {
 
         VersionControlledDirectory versionControlledDirectory = VersionControlledDirectory.cloneFrom(remoteDirectory, new File("").getAbsolutePath());
         System.out.println(versionControlledDirectory.getPath());
-
     }
 
     public void addAll() throws GitAPIException {
@@ -79,9 +78,18 @@ public class VersionControlledDirectory {
 
     public void push(byte[] password) throws GitAPIException {
         PushCommand pushCommand = git.push();
+        executeCommand(pushCommand,password);
+    }
+
+    public void pull(byte[] password) throws GitAPIException {
+        PullCommand pullCommand = git.pull();
+        executeCommand(pullCommand,password);
+    }
+
+    private void executeCommand(TransportCommand command, byte[] password) throws GitAPIException {
         TransportConfigCallback transportConfigCallback = new SSHTransportConfigCallback(password);
-        pushCommand.setTransportConfigCallback(transportConfigCallback);
-        pushCommand.call();
+        command.setTransportConfigCallback(transportConfigCallback);
+        command.call();
     }
 
     private static class SSHTransportConfigCallback implements TransportConfigCallback {

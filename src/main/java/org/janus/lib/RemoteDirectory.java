@@ -2,7 +2,6 @@ package org.janus.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
 
 import java.io.*;
 
@@ -78,6 +77,6 @@ public class RemoteDirectory implements Serializable {
         gson.toJson(this,writer);
         writer.flush();
         writer.close();
-        System.out.println(gson.toJson(this));
+        System.out.println("Remote saved: "+ gson.toJson(this));
     }
 }
