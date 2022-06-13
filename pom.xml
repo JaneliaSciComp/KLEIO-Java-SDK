@@ -11,7 +11,7 @@
     </parent>
     <groupId>org.janus</groupId>
     <artifactId>janus_jclient</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <repositories>
         <repository>
             <id>scijava.public</id>
