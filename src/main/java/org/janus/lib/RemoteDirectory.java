@@ -1,11 +1,17 @@
 package org.janus.lib;
 
-public class RemoteDirectory {
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
+
+import java.io.*;
+
+public class RemoteDirectory implements Serializable {
     private final String host;
     private final String path;
 
     private String username;
-    private byte[] password;
+    private transient byte[] password;
 
     public RemoteDirectory(String host, String path) {
         this.host = host;
@@ -50,9 +56,28 @@ public class RemoteDirectory {
         return String.format("%s@%s:%s", username, host, path);
     }
 
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws IOException {
         RemoteDirectory remoteDirectory = new RemoteDirectory("c13u06.int.janelia.org", "/groups/scicompsoft/home/zouinkhim/test_versioned").setUsername("zouinkhim");
-//        .setPassword(args[0].getBytes());
-        System.out.println(remoteDirectory.getUri());
+        remoteDirectory.setPassword(args[0].getBytes());
+        remoteDirectory.toJson("/Users/zouinkhim/Desktop/active_learning/tmp/remote.json");
+        RemoteDirectory r2 = RemoteDirectory.fromJson("/Users/zouinkhim/Desktop/active_learning/tmp/remote.json");
+        System.out.println(r2.getUri());
+        System.out.println(r2.getPassword());
+
+    }
+
+    public static RemoteDirectory fromJson(String file) throws FileNotFoundException {
+        Gson gson = new GsonBuilder().create();
+        return gson.fromJson(new FileReader(file), RemoteDirectory.class);
+    }
+
+    public void toJson(String file) throws IOException {
+        Writer writer = new FileWriter(file);
+        Gson gson = new GsonBuilder().create();
+        gson.toJson(this,writer);
+        writer.flush();
+        writer.close();
+        System.out.println(gson.toJson(this));
     }
 }
