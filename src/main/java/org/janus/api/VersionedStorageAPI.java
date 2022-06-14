@@ -1,13 +1,14 @@
-package org.janus.lib;
+package org.janus.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.janus.lib.AnnotationSession;
+import org.janus.lib.RemoteDirectory;
+import org.janus.lib.VersionControlledDirectory;
 
 import java.io.*;
-import java.nio.file.FileSystems;
 
 
 public class VersionedStorageAPI implements Serializable {
@@ -34,8 +35,8 @@ public class VersionedStorageAPI implements Serializable {
         return new VersionedStorageAPI(vcd.getPath(),remoteDirectory);
     }
 
-    public AnnotationSession startNewSession(long[] startPosition,long[] endPosition){
-        //TODO API get session id
+    public AnnotationSession startNewSession(long[] startPosition, long[] endPosition){
+
         return null;
     }
 
