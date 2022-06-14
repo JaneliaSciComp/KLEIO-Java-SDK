@@ -32,15 +32,15 @@ public class VersionedStorageAPI implements Serializable {
         VersionControlledDirectory vcd = VersionControlledDirectory.cloneFrom(remoteDirectory, localDirectory);
         System.out.println("Version control repo cloned!");
 
-        return new VersionedStorageAPI(vcd.getPath(),remoteDirectory);
+        return new VersionedStorageAPI(vcd.getPath(), remoteDirectory);
     }
 
-    public AnnotationSession startNewSession(long[] startPosition, long[] endPosition){
+    public AnnotationSession startNewSession() {
 
         return null;
     }
 
-    public static VersionedStorageAPI open(String file,byte[] password) throws FileNotFoundException {
+    public static VersionedStorageAPI open(String file, byte[] password) throws FileNotFoundException {
         Gson gson = new GsonBuilder().create();
         VersionedStorageAPI vsi = gson.fromJson(new FileReader(file), VersionedStorageAPI.class);
         vsi.getRemoteDirectory().setPassword(password);
@@ -56,7 +56,7 @@ public class VersionedStorageAPI implements Serializable {
         System.out.println("Config saved: " + gson.toJson(this));
     }
 
-    public void commit(){
+    public void commit() {
 
     }
 }
