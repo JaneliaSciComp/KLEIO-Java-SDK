@@ -14,7 +14,8 @@ public class MainTest {
                 .setPassword(args[0].getBytes());
         System.out.println(remoteDirectory.getUri());
 
-        VersionControlledDirectory versionControlledDirectory = VersionControlledDirectory.cloneFrom(remoteDirectory, new File("/Users/zouinkhim/Desktop/active_learning").getAbsolutePath());
+        VersionedDirectory versionControlledDirectory = SshVersionedDirectory
+                .cloneFrom(remoteDirectory, new File("/Users/zouinkhim/Desktop/active_learning").getAbsolutePath());
         System.out.println(versionControlledDirectory.getPath());
     // 2- Open
 //        String path = "/Users/zouinkhim/Desktop/active_learning/janus_jclient/test_versioned";
