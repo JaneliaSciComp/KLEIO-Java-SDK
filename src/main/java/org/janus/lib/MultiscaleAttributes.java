@@ -16,7 +16,7 @@ public class MultiscaleAttributes {
     final String dataset;
     final long[] dimensions;
     final int[] blockSize;
-    final int[] gridSize;
+    final long[] gridSize;
 
     public MultiscaleAttributes(String dataset, long[] dimensions, int[] blockSize) {
         this.dataset = dataset;
@@ -25,8 +25,8 @@ public class MultiscaleAttributes {
         this.gridSize = getGridSize(dimensions, blockSize);
     }
 
-    public static int[] getGridSize(long[] dimensions, int[] blockSize) {
-        int[] result = new int[dimensions.length];
+    public static long[] getGridSize(long[] dimensions, int[] blockSize) {
+        long[] result = new long[dimensions.length];
         for (int i = 0; i < dimensions.length; i++) {
             int x = (int) (dimensions[i] / blockSize[i]);
             if ((long) blockSize[i] * x < dimensions[i])
@@ -48,7 +48,7 @@ public class MultiscaleAttributes {
         N5TreeNode root = parsers.discoverRecursive(n5, dataset);
 
         for (N5TreeNode t : root.childrenList()) {
-            result.add(new MultiscaleAttributes(t.getPath(), t.getMetadata().getAttributes().getDimensions(), t.getMetadata().getAttributes().getBlockSize()));
+            result.add(new MultiscaleAttributes(t.getPath().replace(dataset, ""), t.getMetadata().getAttributes().getDimensions(), t.getMetadata().getAttributes().getBlockSize()));
         }
         return result;
     }
@@ -63,9 +63,25 @@ public class MultiscaleAttributes {
                 '}';
     }
 
+    public String getDataset() {
+        return dataset;
+    }
+
+    public long[] getDimensions() {
+        return dimensions;
+    }
+
+    public int[] getBlockSize() {
+        return blockSize;
+    }
+
+    public long[] getGridSize() {
+        return gridSize;
+    }
+
     public static void main(String[] args) {
-        int[] grid = getGridSize(new long[]{600, 600, 600}, new int[]{128, 128, 128});
-        for (int i : grid)
+        long[] grid = getGridSize(new long[]{600, 600, 600}, new int[]{128, 128, 128});
+        for (long i : grid)
             System.out.print(i + " ");
 
     }
