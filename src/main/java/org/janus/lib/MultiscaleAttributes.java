@@ -44,7 +44,6 @@ public class MultiscaleAttributes {
                 N5Importer.GROUP_PARSERS,
                 N5Importer.PARSERS);
 
-        // get the particular metadata we care above
         N5TreeNode root = parsers.discoverRecursive(n5, dataset);
 
         for (N5TreeNode t : root.childrenList()) {
