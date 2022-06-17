@@ -52,6 +52,7 @@ public class MultiscaleAttributes {
         return result;
     }
 
+
     @Override
     public String toString() {
         return "MultiscaleAttributes{" +

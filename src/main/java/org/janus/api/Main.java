@@ -44,6 +44,7 @@ public class Main {
 
         // update index matrix
         versionZarr.write("s0", position, SessionId.get());
+        versionZarr.write("s1", position, SessionId.get());
 
         // push again
         versionControlledDirectory.addAll();
