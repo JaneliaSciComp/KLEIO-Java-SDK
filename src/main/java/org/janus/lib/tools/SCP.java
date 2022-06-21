@@ -1,6 +1,7 @@
-package org.janus.lib;
+package org.janus.lib.tools;
 
 import com.jcraft.jsch.*;
+import org.janus.lib.RemoteDirectory;
 
 import java.io.*;
 import java.util.Properties;

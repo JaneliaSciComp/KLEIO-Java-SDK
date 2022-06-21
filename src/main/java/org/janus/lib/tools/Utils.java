@@ -1,4 +1,4 @@
-package org.janus.lib;
+package org.janus.lib.tools;
 
 import java.util.Arrays;
 
