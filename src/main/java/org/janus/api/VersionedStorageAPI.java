@@ -6,6 +6,7 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janus.lib.*;
 import org.janus.lib.tools.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,5 +104,13 @@ public class VersionedStorageAPI implements Serializable {
     }
 
 
+    public static void cloneProject(@NotNull String projectPath, @NotNull String localPath, @NotNull String username) throws GitAPIException, IOException {
+        LOG.info("Username :" + username);
+        LOG.info("projectPath :" + projectPath);
+        LOG.info("localPath :" + localPath);
+
+        VersionedDirectory.cloneFrom(new File(projectPath, GIT_FOLDER).getAbsolutePath(), localPath, username);
+        LOG.info("Cloned to : " + localPath);
+    }
 }
 
