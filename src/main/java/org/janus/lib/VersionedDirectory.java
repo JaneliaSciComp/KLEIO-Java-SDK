@@ -28,10 +28,10 @@ public class VersionedDirectory {
 
     public static VersionedDirectory cloneFrom(String mountedFile, String targetDirectory, String username) throws GitAPIException, IOException {
         File targetPath;
-        if (new File(targetDirectory).exists())
-            targetPath = new File(targetDirectory, FilenameUtils.getBaseName(mountedFile));
-        else
-            targetPath = new File(targetDirectory);
+//        if (new File(targetDirectory).exists())
+//            targetPath = new File(targetDirectory, FilenameUtils.getBaseName(mountedFile));
+//        else
+        targetPath = new File(targetDirectory);
 
         System.out.println("Target Path: " + targetPath.getAbsolutePath());
         try {
