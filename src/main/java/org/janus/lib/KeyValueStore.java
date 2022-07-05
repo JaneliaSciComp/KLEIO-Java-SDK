@@ -15,6 +15,11 @@ public class KeyValueStore {
     private final String dataset;
     private final long version;
 
+
+    public KeyValueStore(String path, String dataset){
+        this(path,dataset,new UnsignedLongType(0));
+    }
+
     public KeyValueStore(String path, String dataset, UnsignedLongType version) {
         this.path = path;
         this.dataset = dataset;
