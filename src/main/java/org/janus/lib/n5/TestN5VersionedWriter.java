@@ -17,17 +17,17 @@ public class TestN5VersionedWriter {
         String n5_read = "/Users/zouinkhim/Downloads/car/dataset.n5";
         N5FSWriter reader = new N5FSWriter(n5_read);
 
-        HashMap<String, JsonElement> att = reader.getAttributes("setup0/timepoint0/s0");
+        HashMap<String, JsonElement> att = reader.getAttributes("setup0/timepoint0");
 
         for (String key : att.keySet()) {
             System.out.println(key + ":" + att.get(key));
         }
 
-        DatasetAttributes datasetAttributes = reader.getDatasetAttributes("setup0/timepoint0/s0");
-
+        DatasetAttributes datasetAttributes = reader.getDatasetAttributes("setup0/timepoint0");
         String test_data = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset2.v5";
         VersionedN5Writer writer = new VersionedN5Writer(test_data);
-        writer.createDataset("s0",datasetAttributes);
+        writer.createDataset("/",datasetAttributes);
+
 //        writer.setAttributes("s0", att);
 //        HashMap<String, JsonElement> att = writer.getAttributes("/s0");
 
