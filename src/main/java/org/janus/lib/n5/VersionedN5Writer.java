@@ -66,8 +66,11 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     public VersionedN5Writer(String basePath, GsonBuilder gsonBuilder) throws IOException {
         super(basePath, gsonBuilder);
         createDirectories(Paths.get(basePath));
+        createDirectories(Paths.get(basePath,INDEXES_STORE));
+        createDirectories(Paths.get(basePath,KV_STORE));
         if (!VERSION.equals(this.getVersion())) {
             this.setAttribute("/", "n5", VERSION.toString());
+            this.setAttribute("/", "versioned", "true");
         }
 
     }
@@ -82,7 +85,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public void setAttributes(String pathName, Map<String, ?> attributes) throws IOException {
-        Path path = Paths.get(this.basePath,INDEXES_STORE, getAttributesPath(pathName).toString());
+        Path path = Paths.get(this.basePath, getAttributesPath(pathName).toString());
         HashMap<String, JsonElement> map = new HashMap();
         VersionedN5Reader.LockedFileChannel lockedFileChannel = LockedFileChannel.openForWriting(path);
         Throwable var6 = null;
@@ -277,6 +280,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
 
     private static Path createDirectories(Path dir, FileAttribute<?>... attrs) throws IOException {
         try {
+
             createAndCheckIsDirectory(dir, attrs);
             return dir;
         } catch (FileAlreadyExistsException var9) {
