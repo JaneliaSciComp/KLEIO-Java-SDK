@@ -77,12 +77,12 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public void createGroup(String pathName) throws IOException {
-        Path path = Paths.get(this.basePath, pathName);
+        Path path = Paths.get(this.basePath,INDEXES_STORE, pathName);
         createDirectories(path);
     }
 
     public void setAttributes(String pathName, Map<String, ?> attributes) throws IOException {
-        Path path = Paths.get(this.basePath, getAttributesPath(pathName).toString());
+        Path path = Paths.get(this.basePath,INDEXES_STORE, getAttributesPath(pathName).toString());
         HashMap<String, JsonElement> map = new HashMap();
         VersionedN5Reader.LockedFileChannel lockedFileChannel = LockedFileChannel.openForWriting(path);
         Throwable var6 = null;
@@ -141,7 +141,6 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
 
         }
         setBlockVersion(pathName, dataBlock.getGridPosition(), version);
-
     }
 
     private void setBlockVersion(String dataset, long[] gridPosition, long version) throws IOException {
