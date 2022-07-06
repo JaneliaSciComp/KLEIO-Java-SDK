@@ -32,7 +32,6 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -41,7 +40,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
@@ -52,9 +50,8 @@ import java.util.stream.Stream;
  */
 public class VersionedN5Reader extends AbstractGsonReader {
     protected static final String jsonFile = "attributes.json";
-    //    private final static String DATASET_NAME = "dataset.v5";
-    private final static String INDEXES_STORE = "indexes";
-    private final static String KV_STORE = "kv_store";
+    final static String INDEXES_STORE = "indexes";
+    final static String KV_STORE = "kv_store";
     protected final String basePath;
 
     public VersionedN5Reader(String basePath, GsonBuilder gsonBuilder) throws IOException {
@@ -116,7 +113,6 @@ public class VersionedN5Reader extends AbstractGsonReader {
     }
 
     public DataBlock<?> readBlock(String pathName, DatasetAttributes datasetAttributes, long... gridPosition) throws IOException {
-        System.out.println("read block");
         long version = getBlockVersion(pathName,gridPosition);
 //        if(version==0) {
 //            System.out.println("No block data");
@@ -124,10 +120,9 @@ public class VersionedN5Reader extends AbstractGsonReader {
 //        }
         String blockPath = getDataBlockPath(pathName, version,gridPosition).toString();
 
-        System.out.println(blockPath);
         Path path = Paths.get(this.basePath,KV_STORE, blockPath);
         if (!Files.exists(path, new LinkOption[0])) {
-            System.out.println("not found");
+            System.out.println("block not found");
             return null;
         } else {
             VersionedN5Reader.LockedFileChannel lockedChannel = VersionedN5Reader.LockedFileChannel.openForReading(path);
@@ -158,14 +153,11 @@ public class VersionedN5Reader extends AbstractGsonReader {
         }
     }
 
-    private long getBlockVersion(String dataset, long[] gridPosition) throws IOException {
-        System.out.println("get block version"+dataset+"-"+Arrays.toString(gridPosition));
+    long getBlockVersion(String dataset, long[] gridPosition) throws IOException {
         Path path = Paths.get(this.basePath, INDEXES_STORE);
-        System.out.println(path);
         N5ZarrReader reader = new N5ZarrReader(path.toString());
         CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(reader, dataset);
         UnsignedLongType p = img.getAt(gridPosition);
-        System.out.println("Got: "+p.get());
         return p.get();
     }
 
