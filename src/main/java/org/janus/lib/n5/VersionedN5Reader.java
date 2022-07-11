@@ -28,7 +28,9 @@ package org.janus.lib.n5;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
@@ -113,14 +115,14 @@ public class VersionedN5Reader extends AbstractGsonReader {
     }
 
     public DataBlock<?> readBlock(String pathName, DatasetAttributes datasetAttributes, long... gridPosition) throws IOException {
-        long version = getBlockVersion(pathName,gridPosition);
+        long version = getBlockVersion(pathName, gridPosition);
 //        if(version==0) {
 //            System.out.println("No block data");
 //            return null;
 //        }
-        String blockPath = getDataBlockPath(pathName, version,gridPosition).toString();
+        String blockPath = getDataBlockPath(pathName, version, gridPosition).toString();
 
-        Path path = Paths.get(this.basePath,KV_STORE, blockPath);
+        Path path = Paths.get(this.basePath, KV_STORE, blockPath);
         if (!Files.exists(path, new LinkOption[0])) {
             System.out.println("block not found");
             return null;
@@ -198,17 +200,18 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
     protected static Path getDataBlockPath(String datasetPathName, long version, long... gridPosition) {
         String[] pathComponents = new String[gridPosition.length + 1];
-        pathComponents[0] = Long.toString(version);
-        for (int i = 1; i < pathComponents.length; ++i) {
-            pathComponents[i] = Long.toString(gridPosition[i-1]);
+        int i;
+        for (i = 0; i < pathComponents.length - 1; ++i) {
+            pathComponents[i] = Long.toString(gridPosition[i]);
         }
+        pathComponents[i] = Long.toString(version);
 
 
         return Paths.get(removeLeadingSlash(datasetPathName), pathComponents);
     }
 
     protected static Path getAttributesPath(String pathName) {
-        return Paths.get(INDEXES_STORE, removeLeadingSlash(pathName), "attributes.json");
+        return Paths.get(KV_STORE, removeLeadingSlash(pathName), "attributes.json");
     }
 
     protected static String removeLeadingSlash(String pathName) {
@@ -262,5 +265,19 @@ public class VersionedN5Reader extends AbstractGsonReader {
         public void close() throws IOException {
             this.channel.close();
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+//        /indexes/s0
+        String test_data = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset2.v5";
+        VersionedN5Reader reader = new VersionedN5Reader(test_data);
+        HashMap<String, JsonElement> att = reader.getAttributes("/s0");
+
+        for (String key : att.keySet()) {
+            System.out.println(key + ":" + att.get(key));
+        }
+        CachedCellImg<FloatType, ?> img = N5Utils.open(reader, "/s0");
+        ImageJFunctions.show(img);
+
     }
 }

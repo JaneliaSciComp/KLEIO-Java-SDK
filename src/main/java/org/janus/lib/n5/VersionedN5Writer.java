@@ -28,6 +28,7 @@ package org.janus.lib.n5;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
@@ -41,19 +42,19 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
+import org.janus.lib.MultiscaleAttributes;
 import org.janus.lib.SessionId;
+import org.janus.lib.n5.index.IndexN5ZarrWriter;
 
 /**
  * Versioned Store-based N5 implementation.
@@ -61,13 +62,15 @@ import org.janus.lib.SessionId;
  * @author Marwan Zouinkhi
  */
 public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
+    private final IndexN5ZarrWriter indexStore;
     private UnsignedLongType session;
 
     public VersionedN5Writer(String basePath, GsonBuilder gsonBuilder) throws IOException {
         super(basePath, gsonBuilder);
         createDirectories(Paths.get(basePath));
-        createDirectories(Paths.get(basePath,INDEXES_STORE));
-        createDirectories(Paths.get(basePath,KV_STORE));
+        createDirectories(Paths.get(basePath, KV_STORE));
+        this.indexStore = new IndexN5ZarrWriter(Paths.get(basePath, INDEXES_STORE).toString());
+
         if (!VERSION.equals(this.getVersion())) {
             this.setAttribute("/", "n5", VERSION.toString());
             this.setAttribute("/", "versioned", "true");
@@ -79,8 +82,50 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
         this(basePath, new GsonBuilder());
     }
 
+
+    public static VersionedN5Writer convert(N5FSWriter reader, String dataset, String result) throws IOException {
+
+        VersionedN5Writer writer = new VersionedN5Writer(result);
+//        create n5 dataset
+        List<MultiscaleAttributes> atts = MultiscaleAttributes.generateFromN5(reader, dataset);
+        String outputDataset;
+        for (MultiscaleAttributes attributes : atts) {
+            outputDataset = attributes.getDataset();
+            String inputDataset = Paths.get(dataset, outputDataset).toString();
+            System.out.println("Creating : " + outputDataset);
+            DatasetAttributes datasetAttributes = reader.getDatasetAttributes(inputDataset);
+            writer.createDataset(outputDataset, datasetAttributes);
+            //Write blocks
+            CachedCellImg<UnsignedLongType, ?> canvas = N5Utils.open(reader, inputDataset);
+            long[] gridDimensions = canvas.getCellGrid().getGridDimensions();
+            System.out.println("Blocks: " + Arrays.toString(gridDimensions));
+            if (gridDimensions.length != 3) {
+                throw new InvalidPropertiesFormatException("Grid dimension :" + gridDimensions.length + " not implemented yet!");
+            }
+            for (int i = 0; i < gridDimensions[0]; ++i) {
+                for (int j = 0; j < gridDimensions[1]; ++j) {
+                    for (int k = 0; k < gridDimensions[2]; ++k) {
+
+                        long[] gridPosition = new long[]{i, j, k};
+                        System.out.println("Writing: " + Arrays.toString(gridPosition));
+                        DataBlock<?> block = reader.readBlock(inputDataset, datasetAttributes, gridPosition);
+                        writer.writeBlock(outputDataset, datasetAttributes, block);
+                    }
+                }
+            }
+        }
+        return writer;
+    }
+
+    @Override
+    public void createDataset(String pathName, DatasetAttributes datasetAttributes) throws IOException {
+        N5Writer.super.createDataset(pathName, datasetAttributes);
+        CellGrid grid = new CellGrid(datasetAttributes.getDimensions(), datasetAttributes.getBlockSize());
+        indexStore.createDataset(pathName, grid.getGridDimensions());
+    }
+
     public void createGroup(String pathName) throws IOException {
-        Path path = Paths.get(this.basePath,INDEXES_STORE, pathName);
+        Path path = Paths.get(this.basePath, KV_STORE, pathName);
         createDirectories(path);
     }
 
@@ -147,13 +192,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     private void setBlockVersion(String dataset, long[] gridPosition, long version) throws IOException {
-        Path path = Paths.get(this.basePath, INDEXES_STORE);
-        N5ZarrWriter writer = new N5ZarrWriter(path.toString());
-        CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(writer, dataset);
-        UnsignedLongType p = img.getAt(gridPosition);
-        p.set(version);
-        DatasetAttributes attrs = writer.getDatasetAttributes(dataset);
-        N5Utils.save(img, writer, dataset, attrs.getBlockSize(), attrs.getCompression());
+        indexStore.set(dataset, gridPosition, version);
     }
 
     private UnsignedLongType getCurrentSession() {
@@ -334,6 +373,13 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
                 throw var3;
             }
         }
+    }
 
+    public static void main(String[] args) throws IOException {
+        String n5_read = "/Users/zouinkhim/Downloads/car/dataset.n5";
+        String dataset = "setup0/timepoint0";
+        String result = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset2.v5";
+        N5FSWriter reader = new N5FSWriter(n5_read);
+        VersionedN5Writer writer = VersionedN5Writer.convert(reader, dataset, result);
     }
 }

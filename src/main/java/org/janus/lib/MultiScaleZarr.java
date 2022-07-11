@@ -48,7 +48,12 @@ public class MultiScaleZarr {
     public void create(List<MultiscaleAttributes> atts) throws IOException {
         N5ZarrWriter n5 = new N5ZarrWriter(path);
         for (MultiscaleAttributes att : atts)
-            n5.createDataset(att.getDataset(), att.getGridSize(), indexMatrixBlockSize, indexMatrixDataType, indexMatrixCompression);
+            create(n5, att);
         n5.close();
+    }
+
+    public void create(N5ZarrWriter n5, MultiscaleAttributes att) throws IOException {
+        n5.createDataset(att.getDataset(), att.getGridSize(), indexMatrixBlockSize, indexMatrixDataType, indexMatrixCompression);
+
     }
 }

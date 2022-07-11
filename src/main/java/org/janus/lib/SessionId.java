@@ -12,11 +12,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 public class SessionId {
+    private final static boolean TESTING = true;
     private static UnsignedLongType currentId;
 
     private static final String API_LINK = "http://c13u06.int.janelia.org:8000/v1/id";
 
     private static UnsignedLongType getNextId() {
+        if(TESTING)
+            return new UnsignedLongType(10);
         final ClientConfig clientConfig = new DefaultClientConfig();
         final Client client = Client.create(clientConfig);
         final WebResource webResource = client.resource(UriBuilder.fromUri(API_LINK).build());
