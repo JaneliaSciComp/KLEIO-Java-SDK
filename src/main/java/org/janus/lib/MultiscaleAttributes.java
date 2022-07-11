@@ -37,8 +37,12 @@ public class MultiscaleAttributes {
     }
 
     public static List<MultiscaleAttributes> generateFromN5(String n5path, String dataset) throws IOException {
+        return generateFromN5(new N5Factory().openReader(n5path), dataset);
+    }
+
+    public static List<MultiscaleAttributes> generateFromN5(N5Reader n5, String dataset) throws IOException {
         List<MultiscaleAttributes> result = new ArrayList<>();
-        N5Reader n5 = new N5Factory().openReader(n5path);
+
         N5DatasetDiscoverer parsers = new N5DatasetDiscoverer(
                 Executors.newSingleThreadExecutor(),
                 N5Importer.GROUP_PARSERS,

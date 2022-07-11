@@ -7,7 +7,6 @@ import org.janus.lib.SessionId;
 import org.janus.lib.VersionedDirectory;
 import org.janus.lib.KeyValueStore;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 

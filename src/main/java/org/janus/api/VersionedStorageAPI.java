@@ -2,6 +2,7 @@ package org.janus.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janus.lib.*;
@@ -16,11 +17,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
+
 
 public class VersionedStorageAPI implements Serializable {
 
     private final static String GIT_FOLDER = "git_indexes";
     private final static String KV_STORE = "data_kv";
+    private static boolean isVersioned = false;
+
+    public static boolean isIsVersioned() {
+        return isVersioned;
+    }
+
+    public static void setIsVersioned(boolean isVersioned) {
+        VersionedStorageAPI.isVersioned = isVersioned;
+    }
+
     private static Logger LOG = LoggerFactory.getLogger(VersionedStorageAPI.class);
     private static String localPath;
     private String localFolder;
@@ -38,6 +51,24 @@ public class VersionedStorageAPI implements Serializable {
 
     public static String getLocalPath() {
         return localPath;
+    }
+
+    public static void commit(final CachedCellImg<UnsignedLongType, ?> canvas, final long[] blocks) throws IOException {
+
+
+//        //  store annotation in key store
+//        // TODO get project path
+//        // TODO resolution manage
+//        String projectPath ="";
+//        String kvstore = new File(projectPath, KV_STORE).getAbsolutePath();
+//        KeyValueStore kv = new KeyValueStore(kvstore, "s0", SessionId.get());
+//        kv.set(blocks, canvas.copy());
+//
+//        // update index matrix
+//        versionZarr.write("s0", position, SessionId.get());
+//        versionZarr.write("s1", position, SessionId.get());
+
+
     }
 
     public VersionedStorageAPI startNewSession() {
@@ -118,9 +149,9 @@ public class VersionedStorageAPI implements Serializable {
         LOG.info("projectPath :" + projectPath);
         LOG.info("localPath :" + localPath);
 
-//        VersionedDirectory.cloneFrom(new File(projectPath, GIT_FOLDER).getAbsolutePath(), localPath, username);
+        VersionedDirectory.cloneFrom(new File(projectPath, GIT_FOLDER).getAbsolutePath(), localPath, username);
 
-        VersionedDirectory.cloneFrom(projectPath, localPath, username);
+//        VersionedDirectory.cloneFrom(projectPath, localPath, username);
         LOG.info("Cloned to : " + localPath);
     }
 
