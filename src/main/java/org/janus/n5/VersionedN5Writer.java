@@ -23,38 +23,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.janus.lib.n5;
+package org.janus.n5;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AccessMode;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystemException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.FileAttribute;
-import java.util.*;
-import java.util.stream.Stream;
-
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
-import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 import org.janus.lib.MultiscaleAttributes;
 import org.janus.lib.SessionId;
-import org.janus.lib.n5.index.IndexN5ZarrWriter;
+import org.janus.n5.index.IndexN5ZarrWriter;
+
+import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Versioned Store-based N5 implementation.

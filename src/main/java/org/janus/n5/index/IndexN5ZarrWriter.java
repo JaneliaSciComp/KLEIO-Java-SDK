@@ -1,4 +1,4 @@
-package org.janus.lib.n5.index;
+package org.janus.n5.index;
 
 import com.google.gson.GsonBuilder;
 import net.imglib2.cache.img.CachedCellImg;
