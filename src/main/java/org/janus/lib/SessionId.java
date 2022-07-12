@@ -10,6 +10,8 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SessionId {
         private final static boolean TESTING = true;
@@ -19,7 +21,7 @@ public class SessionId {
 
     private static UnsignedLongType getNextId() {
         if(TESTING)
-            return new UnsignedLongType(10);
+            return new UnsignedLongType(ThreadLocalRandom.current().nextInt(10, 1000 ));
         final ClientConfig clientConfig = new DefaultClientConfig();
         final Client client = Client.create(clientConfig);
         final WebResource webResource = client.resource(UriBuilder.fromUri(API_LINK).build());

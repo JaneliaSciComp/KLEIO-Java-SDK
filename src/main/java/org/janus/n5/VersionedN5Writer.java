@@ -30,12 +30,16 @@ import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janus.lib.MultiscaleAttributes;
 import org.janus.lib.SessionId;
+import org.janus.lib.VersionedDirectory;
+import org.janus.lib.tools.Utils;
 import org.janus.n5.index.IndexN5ZarrWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
@@ -51,27 +55,58 @@ import java.util.stream.Stream;
  */
 public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     private final IndexN5ZarrWriter indexStore;
+    private final VersionedDirectory versionedDirectory;
     private UnsignedLongType session;
+    private ArrayList<long[]> uncommittedBlocks;
 
-    public VersionedN5Writer(String basePath, GsonBuilder gsonBuilder) throws IOException {
-        super(basePath, gsonBuilder);
-        createDirectories(Paths.get(basePath));
-        createDirectories(Paths.get(basePath, KV_STORE));
-        this.indexStore = new IndexN5ZarrWriter(Paths.get(basePath, INDEXES_STORE).toString());
+    private String userID;
 
+    private VersionedN5Writer(String basePath) throws IOException, GitAPIException {
+        super(basePath);
+        this.uncommittedBlocks = new ArrayList<>();
+
+        if (!new File(basePath).exists()) {
+            System.out.println("Creating..");
+            createDirectories(Paths.get(basePath));
+            createDirectories(Paths.get(kv_directory));
+            new IndexN5ZarrWriter(index_directory);
+            VersionedDirectory.initRepo(index_directory);
+        }
+        this.indexStore = new IndexN5ZarrWriter(index_directory);
+
+        this.versionedDirectory = VersionedDirectory.open(index_directory);
         if (!VERSION.equals(this.getVersion())) {
             this.setAttribute("/", "n5", VERSION.toString());
             this.setAttribute("/", "versioned", "true");
+            this.setAttribute("/", "master", "true");
         }
-
     }
 
-    public VersionedN5Writer(String basePath) throws IOException {
-        this(basePath, new GsonBuilder());
+    private VersionedN5Writer(String KvDirectory, String indexDirectory) throws IOException {
+        super(KvDirectory, indexDirectory);
+        this.indexStore = new IndexN5ZarrWriter(index_directory);
+        this.versionedDirectory = VersionedDirectory.open(indexDirectory);
+        if (!VERSION.equals(this.getVersion())) {
+            this.setAttribute("/", "n5", VERSION.toString());
+            this.setAttribute("/", "versioned", "true");
+            this.setAttribute("/", "master", "false");
+        }
     }
 
+    public static VersionedN5Writer openMaster(String basePath) throws IOException, GitAPIException {
+        return new VersionedN5Writer(basePath);
+    }
 
-    public static VersionedN5Writer convert(N5FSWriter reader, String dataset, String result) throws IOException {
+    public static VersionedN5Writer openCloned( String remotePath,String localPath) throws IOException {
+        return new VersionedN5Writer(Paths.get(remotePath, KV_STORE).toString(), localPath);
+    }
+
+    public static VersionedN5Writer cloneFrom(String remotePath, String localPath, String username) throws GitAPIException, IOException {
+        VersionedDirectory.cloneFrom(Paths.get(remotePath, INDEXES_STORE).toString(), localPath, username);
+        return openCloned(remotePath, localPath);
+    }
+
+    public static VersionedN5Writer convert(N5FSWriter reader, String dataset, String result) throws IOException, GitAPIException {
 
         VersionedN5Writer writer = new VersionedN5Writer(result);
 //        create n5 dataset
@@ -102,8 +137,10 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
                 }
             }
         }
+        writer.commit();
         return writer;
     }
+
 
     @Override
     public void createDataset(String pathName, DatasetAttributes datasetAttributes) throws IOException {
@@ -113,12 +150,12 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public void createGroup(String pathName) throws IOException {
-        Path path = Paths.get(this.basePath, KV_STORE, pathName);
+        Path path = Paths.get(this.kv_directory, pathName);
         createDirectories(path);
     }
 
     public void setAttributes(String pathName, Map<String, ?> attributes) throws IOException {
-        Path path = Paths.get(this.basePath, getAttributesPath(pathName).toString());
+        Path path = Paths.get(this.kv_directory, getAttributesPath(pathName).toString());
         HashMap<String, JsonElement> map = new HashMap();
         VersionedN5Reader.LockedFileChannel lockedFileChannel = LockedFileChannel.openForWriting(path);
         Throwable var6 = null;
@@ -143,15 +180,13 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
                     lockedFileChannel.close();
                 }
             }
-
         }
-
     }
 
     public <T> void writeBlock(String pathName, DatasetAttributes datasetAttributes, DataBlock<T> dataBlock) throws IOException {
-
+        uncommittedBlocks.add(dataBlock.getGridPosition());
         long version = getCurrentSession().get();
-        Path path = Paths.get(this.basePath, KV_STORE, getDataBlockPath(pathName, version, dataBlock.getGridPosition()).toString());
+        Path path = Paths.get(this.kv_directory, getDataBlockPath(pathName, version, dataBlock.getGridPosition()).toString());
         createDirectories(path.getParent());
         VersionedN5Reader.LockedFileChannel lockedChannel = LockedFileChannel.openForWriting(path);
         Throwable var6 = null;
@@ -199,7 +234,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public boolean remove(String pathName) throws IOException {
-        Path path = Paths.get(this.basePath, pathName);
+        Path path = Paths.get(this.kv_directory, pathName);
         if (Files.exists(path, new LinkOption[0])) {
             Stream<Path> pathStream = Files.walk(path);
             Throwable var4 = null;
@@ -276,7 +311,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
 
     public boolean deleteBlock(String pathName, long... gridPosition) throws IOException {
         long version = getBlockVersion(pathName, gridPosition);
-        Path path = Paths.get(this.basePath, KV_STORE, getDataBlockPath(pathName, version, gridPosition).toString());
+        Path path = Paths.get(this.kv_directory, getDataBlockPath(pathName, version, gridPosition).toString());
         if (Files.exists(path, new LinkOption[0])) {
             VersionedN5Reader.LockedFileChannel channel = LockedFileChannel.openForWriting(path);
             Throwable var5 = null;
@@ -363,11 +398,26 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public void commit() throws GitAPIException {
+        String message = Utils.format(uncommittedBlocks);
+        //TODO add only uncommitted
+        versionedDirectory.addAll();
+        versionedDirectory.commit(message);
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
+    public static void main(String[] args) throws IOException, GitAPIException {
         String n5_read = "/Users/zouinkhim/Downloads/car/dataset.n5";
         String dataset = "setup0/timepoint0";
         String result = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset2.v5";
         N5FSWriter reader = new N5FSWriter(n5_read);
         VersionedN5Writer writer = VersionedN5Writer.convert(reader, dataset, result);
+
+        writer.setUserID("zouinkhim");
+        writer.commit();
     }
+
 }

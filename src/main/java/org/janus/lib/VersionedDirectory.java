@@ -15,6 +15,7 @@ public class VersionedDirectory {
 
     protected VersionedDirectory(String path) throws IOException {
         this.path = path;
+
         this.git = Git.open(new File(path));
     }
 
@@ -22,11 +23,21 @@ public class VersionedDirectory {
         return new VersionedDirectory(path);
     }
 
+    public static VersionedDirectory initRepo(String path) throws IOException, GitAPIException {
+        File file = new File(path);
+        if(!file.exists()){
+            throw new IOException("Folder "+path + " doesn't exist !");
+        }
+        Git.init().setDirectory(file).call();
+        return open(path);
+    }
+
     public String getPath() {
         return path;
     }
 
     public static VersionedDirectory cloneFrom(String mountedFile, String targetDirectory, String username) throws GitAPIException, IOException {
+        System.out.println("cloning:"+mountedFile);
         File targetPath;
 //        if (new File(targetDirectory).exists())
 //            targetPath = new File(targetDirectory, FilenameUtils.getBaseName(mountedFile));

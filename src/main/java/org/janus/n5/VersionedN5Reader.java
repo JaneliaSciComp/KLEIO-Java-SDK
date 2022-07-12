@@ -31,6 +31,7 @@ import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import net.imglib2.type.numeric.real.FloatType;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
@@ -52,13 +53,16 @@ import java.util.stream.Stream;
  */
 public class VersionedN5Reader extends AbstractGsonReader {
     protected static final String jsonFile = "attributes.json";
-    final static String INDEXES_STORE = "indexes";
-    final static String KV_STORE = "kv_store";
-    protected final String basePath;
+    protected final static String INDEXES_STORE = "indexes";
+    protected final static String KV_STORE = "kv_store";
 
-    public VersionedN5Reader(String basePath, GsonBuilder gsonBuilder) throws IOException {
-        super(gsonBuilder);
-        this.basePath = basePath;
+    protected final String kv_directory;
+    protected final String index_directory;
+//    protected final String basePath;
+
+    protected VersionedN5Reader(String basePath) throws IOException {
+//        this.basePath = basePath;
+        this(Paths.get(basePath, KV_STORE).toString(), Paths.get(basePath, INDEXES_STORE).toString());
         if (this.exists("/")) {
             N5Reader.Version version = this.getVersion();
             if (!VERSION.isCompatible(version)) {
@@ -68,21 +72,40 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
     }
 
-    public VersionedN5Reader(String basePath) throws IOException {
-        this(basePath, new GsonBuilder());
+
+    protected VersionedN5Reader(String kv_directory, String index_directory) throws IOException {
+        super(new GsonBuilder());
+//        this.basePath = basePath;
+        this.kv_directory = kv_directory;
+        this.index_directory = index_directory;
+        if (this.exists("/")) {
+            N5Reader.Version version = this.getVersion();
+            if (!VERSION.isCompatible(version)) {
+                throw new IOException("Incompatible version " + version + " (this is " + VERSION + ").");
+            }
+        }
+
     }
 
-    public String getBasePath() {
-        return this.basePath;
+    public static VersionedN5Reader openMaster(String basePath) throws IOException, GitAPIException {
+        return new VersionedN5Reader(basePath);
     }
+
+    public static VersionedN5Reader openLocal(String remotePath, String localPath) throws IOException {
+        return new VersionedN5Reader(remotePath, localPath);
+    }
+
+//    public String getBasePath() {
+//        return this.basePath;
+//    }
 
     public boolean exists(String pathName) {
-        Path path = Paths.get(this.basePath, pathName);
+        Path path = Paths.get(this.kv_directory, pathName);
         return Files.exists(path, new LinkOption[0]) && Files.isDirectory(path, new LinkOption[0]);
     }
 
     public HashMap<String, JsonElement> getAttributes(String pathName) throws IOException {
-        Path path = Paths.get(this.basePath, getAttributesPath(pathName).toString());
+        Path path = Paths.get(this.kv_directory, getAttributesPath(pathName).toString());
         if (this.exists(pathName) && !Files.exists(path, new LinkOption[0])) {
             return new HashMap();
         } else {
@@ -122,7 +145,7 @@ public class VersionedN5Reader extends AbstractGsonReader {
 //        }
         String blockPath = getDataBlockPath(pathName, version, gridPosition).toString();
 
-        Path path = Paths.get(this.basePath, KV_STORE, blockPath);
+        Path path = Paths.get(this.kv_directory, blockPath);
         if (!Files.exists(path, new LinkOption[0])) {
             System.out.println("block not found");
             return null;
@@ -156,7 +179,7 @@ public class VersionedN5Reader extends AbstractGsonReader {
     }
 
     long getBlockVersion(String dataset, long[] gridPosition) throws IOException {
-        Path path = Paths.get(this.basePath, INDEXES_STORE);
+        Path path = Paths.get(this.index_directory);
         N5ZarrReader reader = new N5ZarrReader(path.toString());
         CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(reader, dataset);
         UnsignedLongType p = img.getAt(gridPosition);
@@ -164,7 +187,7 @@ public class VersionedN5Reader extends AbstractGsonReader {
     }
 
     public String[] list(String pathName) throws IOException {
-        Path path = Paths.get(this.basePath, pathName);
+        Path path = Paths.get(this.kv_directory, pathName);
         Stream<Path> pathStream = Files.list(path);
         Throwable var4 = null;
 
@@ -211,15 +234,19 @@ public class VersionedN5Reader extends AbstractGsonReader {
     }
 
     protected static Path getAttributesPath(String pathName) {
-        return Paths.get(KV_STORE, removeLeadingSlash(pathName), "attributes.json");
+        return Paths.get(removeLeadingSlash(pathName), "attributes.json");
     }
 
     protected static String removeLeadingSlash(String pathName) {
         return !pathName.startsWith("/") && !pathName.startsWith("\\") ? pathName : pathName.substring(1);
     }
 
+    @Override
     public String toString() {
-        return String.format("%s[basePath=%s]", this.getClass().getSimpleName(), this.basePath);
+        return "VersionedN5Reader{" +
+                "kv_directory='" + kv_directory + '\'' +
+                ", index_directory='" + index_directory + '\'' +
+                '}';
     }
 
     protected static class LockedFileChannel implements Closeable {
@@ -267,17 +294,22 @@ public class VersionedN5Reader extends AbstractGsonReader {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, GitAPIException {
 //        /indexes/s0
         String test_data = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset2.v5";
-        VersionedN5Reader reader = new VersionedN5Reader(test_data);
-        HashMap<String, JsonElement> att = reader.getAttributes("/s0");
+//        VersionedN5Reader reader = new VersionedN5Reader(test_data);
+        VersionedN5Reader reader = VersionedN5Reader.openMaster(test_data);
+        String[] resolutions = new String[]{"s0", "s1", "s2"};
+        for (String s:resolutions){
+            HashMap<String, JsonElement> att = reader.getAttributes(s);
 
-        for (String key : att.keySet()) {
-            System.out.println(key + ":" + att.get(key));
+            for (String key : att.keySet()) {
+                System.out.println(key + ":" + att.get(key));
+            }
+            CachedCellImg<FloatType, ?> img = N5Utils.open(reader, s);
+            ImageJFunctions.show(img);
         }
-        CachedCellImg<FloatType, ?> img = N5Utils.open(reader, "/s0");
-        ImageJFunctions.show(img);
+
 
     }
 }
