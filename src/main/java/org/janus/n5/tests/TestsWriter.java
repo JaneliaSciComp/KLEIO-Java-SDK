@@ -22,7 +22,7 @@ public class TestsWriter {
 
     public static void main(String[] args) throws GitAPIException, IOException {
         convertN5ToVersioned();
-//        cloneMaster();
+        cloneMaster();
     }
 
 

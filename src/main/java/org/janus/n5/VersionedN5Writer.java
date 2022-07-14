@@ -211,10 +211,11 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
             }
 
         }
-        setBlockVersion(pathName, dataBlock.getGridPosition(), version);
+        // Modify Zarr index
+        updateBlockIndex(pathName, dataBlock.getGridPosition(), version);
     }
 
-    private void setBlockVersion(String dataset, long[] gridPosition, long version) throws IOException {
+    private void updateBlockIndex(String dataset, long[] gridPosition, long version) throws IOException {
         indexStore.set(dataset, gridPosition, version);
     }
 

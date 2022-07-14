@@ -223,11 +223,12 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
     protected static Path getDataBlockPath(String datasetPathName, long version, long... gridPosition) {
         String[] pathComponents = new String[gridPosition.length + 1];
-        int i;
-        for (i = 0; i < pathComponents.length - 1; ++i) {
-            pathComponents[i] = Long.toString(gridPosition[i]);
+
+        pathComponents[0] = Long.toString(version);
+        for (int i = 1; i < pathComponents.length; ++i) {
+            pathComponents[i] = Long.toString(gridPosition[i-1]);
         }
-        pathComponents[i] = Long.toString(version);
+
 
 
         return Paths.get(removeLeadingSlash(datasetPathName), pathComponents);
