@@ -1,4 +1,4 @@
-package org.janus.lib;
+package org.janelia.scicomp.lib;
 
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.iq80.leveldb.DB;

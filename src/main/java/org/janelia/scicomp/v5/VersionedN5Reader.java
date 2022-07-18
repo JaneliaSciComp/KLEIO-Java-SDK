@@ -23,7 +23,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.janus.n5;
+package org.janelia.scicomp.v5;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;

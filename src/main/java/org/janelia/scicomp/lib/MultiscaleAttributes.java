@@ -1,4 +1,4 @@
-package org.janus.lib;
+package org.janelia.scicomp.lib;
 
 import org.janelia.saalfeldlab.n5.N5DatasetDiscoverer;
 import org.janelia.saalfeldlab.n5.N5Reader;

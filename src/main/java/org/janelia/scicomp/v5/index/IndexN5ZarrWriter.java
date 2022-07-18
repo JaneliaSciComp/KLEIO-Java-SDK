@@ -1,4 +1,4 @@
-package org.janus.n5.index;
+package org.janelia.scicomp.v5.index;
 
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.type.numeric.integer.UnsignedLongType;

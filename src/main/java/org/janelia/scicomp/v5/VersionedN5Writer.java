@@ -23,9 +23,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.janus.n5;
+package org.janelia.scicomp.v5;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.cell.CellGrid;
@@ -33,11 +32,11 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janus.lib.MultiscaleAttributes;
-import org.janus.lib.SessionId;
-import org.janus.lib.VersionedDirectory;
-import org.janus.lib.tools.Utils;
-import org.janus.n5.index.IndexN5ZarrWriter;
+import org.janelia.scicomp.lib.MultiscaleAttributes;
+import org.janelia.scicomp.lib.SessionId;
+import org.janelia.scicomp.lib.VersionedDirectory;
+import org.janelia.scicomp.lib.tools.Utils;
+import org.janelia.scicomp.v5.index.IndexN5ZarrWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +60,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
 
     private String userID;
 
-    private VersionedN5Writer(String basePath) throws IOException, GitAPIException {
+    protected VersionedN5Writer(String basePath) throws IOException {
         super(basePath);
         this.uncommittedBlocks = new ArrayList<>();
 

@@ -1,14 +1,16 @@
-package org.janus.api;
+package org.janelia.scicomp.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.janus.lib.*;
-import org.janus.lib.tools.Utils;
+import org.janelia.scicomp.lib.MultiScaleZarr;
+import org.janelia.scicomp.lib.MultiscaleAttributes;
+import org.janelia.scicomp.lib.RemoteDirectory;
+import org.janelia.scicomp.lib.VersionedDirectory;
+import org.janelia.scicomp.lib.tools.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +18,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 
 
 public class VersionedStorageAPI implements Serializable {

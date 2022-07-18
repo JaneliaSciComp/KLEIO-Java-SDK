@@ -1,11 +1,11 @@
-package org.janus.api;
+package org.janelia.scicomp.api;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.janus.lib.MultiScaleZarr;
-import org.janus.lib.MultiscaleAttributes;
-import org.janus.lib.SessionId;
-import org.janus.lib.VersionedDirectory;
-import org.janus.lib.KeyValueStore;
+import org.janelia.scicomp.lib.MultiScaleZarr;
+import org.janelia.scicomp.lib.MultiscaleAttributes;
+import org.janelia.scicomp.lib.SessionId;
+import org.janelia.scicomp.lib.VersionedDirectory;
+import org.janelia.scicomp.lib.KeyValueStore;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,7 +1,6 @@
-package org.janus.lib;
+package org.janelia.scicomp.lib;
 
 
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -23,12 +22,16 @@ public class VersionedDirectory {
         return new VersionedDirectory(path);
     }
 
-    public static VersionedDirectory initRepo(String path) throws IOException, GitAPIException {
+    public static VersionedDirectory initRepo(String path) throws IOException {
         File file = new File(path);
-        if(!file.exists()){
-            throw new IOException("Folder "+path + " doesn't exist !");
+        if (!file.exists()) {
+            throw new IOException("Folder " + path + " doesn't exist !");
         }
-        Git.init().setDirectory(file).call();
+        try {
+            Git.init().setDirectory(file).call();
+        } catch (GitAPIException e) {
+            throw new IOException(e);
+        }
         return open(path);
     }
 
@@ -36,8 +39,8 @@ public class VersionedDirectory {
         return path;
     }
 
-    public static VersionedDirectory cloneFrom(String mountedFile, String targetDirectory, String username) throws GitAPIException, IOException {
-        System.out.println("cloning:"+mountedFile);
+    public static VersionedDirectory cloneFrom(String mountedFile, String targetDirectory, String username) throws IOException {
+        System.out.println("cloning:" + mountedFile);
         File targetPath;
 //        if (new File(targetDirectory).exists())
 //            targetPath = new File(targetDirectory, FilenameUtils.getBaseName(mountedFile));
@@ -52,7 +55,7 @@ public class VersionedDirectory {
             cfg.save();
         } catch (GitAPIException e) {
             System.out.println("Couldn't clone :" + mountedFile);
-            throw e;
+            throw new IOException(e);
         }
         return new VersionedDirectory(targetPath.getAbsolutePath());
     }
@@ -84,6 +87,4 @@ public class VersionedDirectory {
         PullCommand pullCommand = git.pull();
         pullCommand.call();
     }
-
-
 }

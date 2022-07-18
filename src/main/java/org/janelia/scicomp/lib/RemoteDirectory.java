@@ -1,4 +1,4 @@
-package org.janus.lib;
+package org.janelia.scicomp.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

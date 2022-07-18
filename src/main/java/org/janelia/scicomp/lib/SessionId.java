@@ -1,4 +1,4 @@
-package org.janus.lib;
+package org.janelia.scicomp.lib;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -10,7 +10,6 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SessionId {

@@ -1,7 +1,7 @@
-package org.janus.lib.tools;
+package org.janelia.scicomp.lib.tools;
 
 import com.jcraft.jsch.*;
-import org.janus.lib.RemoteDirectory;
+import org.janelia.scicomp.lib.RemoteDirectory;
 
 import java.io.*;
 import java.util.Properties;

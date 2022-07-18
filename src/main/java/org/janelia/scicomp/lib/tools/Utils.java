@@ -1,4 +1,4 @@
-package org.janus.lib.tools;
+package org.janelia.scicomp.lib.tools;
 
 import java.util.ArrayList;
 import java.util.Arrays;

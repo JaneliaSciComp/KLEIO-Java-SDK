@@ -1,10 +1,9 @@
-package org.janus.lib;
+package org.janelia.scicomp.lib;
 
 import com.jcraft.jsch.Session;
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.internal.JGitText;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
@@ -14,7 +13,6 @@ import org.eclipse.jgit.transport.ssh.jsch.OpenSshConfig;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.MessageFormat;
 
 public class SshVersionedDirectory extends VersionedDirectory {
     private byte[] password;

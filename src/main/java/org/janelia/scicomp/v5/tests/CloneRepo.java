@@ -1,7 +1,7 @@
-package org.janus.n5.tests;
+package org.janelia.scicomp.v5.tests;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.janus.n5.VersionedN5Writer;
+import org.janelia.scicomp.v5.VersionedN5Writer;
 
 import java.io.IOException;
 
