@@ -58,11 +58,12 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
     protected final String kv_directory;
     protected final String index_directory;
-//    protected final String basePath;
+    protected String basePath;
 
     protected VersionedN5Reader(String basePath) throws IOException {
-//        this.basePath = basePath;
+
         this(Paths.get(basePath, KV_STORE).toString(), Paths.get(basePath, INDEXES_STORE).toString());
+        this.basePath = basePath;
         if (this.exists("/")) {
             N5Reader.Version version = this.getVersion();
             if (!VERSION.isCompatible(version)) {
@@ -75,6 +76,7 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
     protected VersionedN5Reader(String kv_directory, String index_directory) throws IOException {
         super(new GsonBuilder());
+        this.basePath = index_directory;
 //        this.basePath = basePath;
         this.kv_directory = kv_directory;
         this.index_directory = index_directory;
@@ -105,7 +107,7 @@ public class VersionedN5Reader extends AbstractGsonReader {
     }
 
     public HashMap<String, JsonElement> getAttributes(String pathName) throws IOException {
-        Path path = Paths.get(this.kv_directory, getAttributesPath(pathName).toString());
+        Path path = getAttributesPath(pathName);
         if (this.exists(pathName) && !Files.exists(path, new LinkOption[0])) {
             return new HashMap();
         } else {
@@ -226,16 +228,21 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
         pathComponents[0] = Long.toString(version);
         for (int i = 1; i < pathComponents.length; ++i) {
-            pathComponents[i] = Long.toString(gridPosition[i-1]);
+            pathComponents[i] = Long.toString(gridPosition[i - 1]);
         }
-
 
 
         return Paths.get(removeLeadingSlash(datasetPathName), pathComponents);
     }
 
-    protected static Path getAttributesPath(String pathName) {
-        return Paths.get(removeLeadingSlash(pathName), "attributes.json");
+    protected Path getAttributesPath(String pathName) {
+        Path path;
+        if (removeLeadingSlash(pathName) == "") {
+            path = Paths.get(this.basePath, pathName);
+        } else {
+            path = Paths.get(this.kv_directory, pathName);
+        }
+        return Paths.get(path.toString(), "attributes.json");
     }
 
     protected static String removeLeadingSlash(String pathName) {
@@ -297,11 +304,11 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
     public static void main(String[] args) throws IOException, GitAPIException {
 //        /indexes/s0
-        String test_data = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset2.v5";
+        String test_data = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dd.v5";
 //        VersionedN5Reader reader = new VersionedN5Reader(test_data);
         VersionedN5Reader reader = VersionedN5Reader.openMaster(test_data);
         String[] resolutions = new String[]{"s0", "s1", "s2"};
-        for (String s:resolutions){
+        for (String s : resolutions) {
             HashMap<String, JsonElement> att = reader.getAttributes(s);
 
             for (String key : att.keySet()) {

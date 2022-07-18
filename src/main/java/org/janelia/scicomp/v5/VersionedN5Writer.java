@@ -60,11 +60,12 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
 
     private String userID;
 
-    protected VersionedN5Writer(String basePath) throws IOException {
+
+    protected VersionedN5Writer(String basePath,boolean overwrite) throws IOException {
         super(basePath);
         this.uncommittedBlocks = new ArrayList<>();
 
-        if (!new File(basePath).exists()) {
+        if (!new File(basePath).exists() || overwrite) {
             System.out.println("Creating..");
             createDirectories(Paths.get(basePath));
             createDirectories(Paths.get(kv_directory));
@@ -79,6 +80,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
             this.setAttribute("/", "versioned", "true");
             this.setAttribute("/", "master", "true");
         }
+        System.out.println("done..");
     }
 
     private VersionedN5Writer(String KvDirectory, String indexDirectory) throws IOException {
@@ -92,22 +94,26 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
         }
     }
 
-    public static VersionedN5Writer openMaster(String basePath) throws IOException, GitAPIException {
-        return new VersionedN5Writer(basePath);
+    public static VersionedN5Writer openMaster(String basePath) throws IOException {
+        return new VersionedN5Writer(basePath,false);
+    }
+
+    public static VersionedN5Writer createMaster(String basePath) throws IOException {
+        return new VersionedN5Writer(basePath,true);
     }
 
     public static VersionedN5Writer openCloned( String remotePath,String localPath) throws IOException {
         return new VersionedN5Writer(Paths.get(remotePath, KV_STORE).toString(), localPath);
     }
 
-    public static VersionedN5Writer cloneFrom(String remotePath, String localPath, String username) throws GitAPIException, IOException {
+    public static VersionedN5Writer cloneFrom(String remotePath, String localPath, String username) throws IOException {
         VersionedDirectory.cloneFrom(Paths.get(remotePath, INDEXES_STORE).toString(), localPath, username);
         return openCloned(remotePath, localPath);
     }
 
     public static VersionedN5Writer convert(N5FSWriter reader, String dataset, String result) throws IOException, GitAPIException {
 
-        VersionedN5Writer writer = new VersionedN5Writer(result);
+        VersionedN5Writer writer = new VersionedN5Writer(result,true);
 //        create n5 dataset
         List<MultiscaleAttributes> atts = MultiscaleAttributes.generateFromN5(reader, dataset);
         String outputDataset;
@@ -154,7 +160,8 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public void setAttributes(String pathName, Map<String, ?> attributes) throws IOException {
-        Path path = Paths.get(this.kv_directory, getAttributesPath(pathName).toString());
+//        Path path = Paths.get(this.kv_directory, getAttributesPath(pathName).toString());
+        Path path = getAttributesPath(pathName);
         HashMap<String, JsonElement> map = new HashMap();
         VersionedN5Reader.LockedFileChannel lockedFileChannel = LockedFileChannel.openForWriting(path);
         Throwable var6 = null;
@@ -412,7 +419,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     public static void main(String[] args) throws IOException, GitAPIException {
         String n5_read = "/Users/zouinkhim/Downloads/car/dataset.n5";
         String dataset = "setup0/timepoint0";
-        String result = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset2.v5";
+        String result = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dd.v5";
         N5FSWriter reader = new N5FSWriter(n5_read);
         VersionedN5Writer writer = VersionedN5Writer.convert(reader, dataset, result);
 
