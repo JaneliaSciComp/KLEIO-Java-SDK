@@ -87,4 +87,8 @@ public class VersionedDirectory {
         PullCommand pullCommand = git.pull();
         pullCommand.call();
     }
+
+    public void checkout(String name, boolean create) throws GitAPIException {
+        git.checkout().setCreateBranch(create).setName(name).call();
+    }
 }

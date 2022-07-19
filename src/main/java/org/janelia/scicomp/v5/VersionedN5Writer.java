@@ -412,6 +412,10 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
         versionedDirectory.commit(message);
     }
 
+    public void checkoutNewBranch(String name) throws GitAPIException {
+        versionedDirectory.checkout(name,true);
+    }
+
     public void setUserID(String userID) {
         this.userID = userID;
     }
