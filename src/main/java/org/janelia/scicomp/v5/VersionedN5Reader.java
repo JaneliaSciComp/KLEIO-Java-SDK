@@ -60,6 +60,10 @@ public class VersionedN5Reader extends AbstractGsonReader {
     protected final String index_directory;
     protected String basePath;
 
+    public String getBasePath() {
+        return basePath;
+    }
+
     protected VersionedN5Reader(String basePath) throws IOException {
 
         this(Paths.get(basePath, KV_STORE).toString(), Paths.get(basePath, INDEXES_STORE).toString());
