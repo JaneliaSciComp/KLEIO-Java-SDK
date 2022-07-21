@@ -68,13 +68,6 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
         this(Paths.get(basePath, KV_STORE).toString(), Paths.get(basePath, INDEXES_STORE).toString());
         this.basePath = basePath;
-        if (this.exists("/")) {
-            N5Reader.Version version = this.getVersion();
-            if (!VERSION.isCompatible(version)) {
-                throw new IOException("Incompatible version " + version + " (this is " + VERSION + ").");
-            }
-        }
-
     }
 
 
@@ -92,18 +85,6 @@ public class VersionedN5Reader extends AbstractGsonReader {
         }
 
     }
-
-    public static VersionedN5Reader openMaster(String basePath) throws IOException, GitAPIException {
-        return new VersionedN5Reader(basePath);
-    }
-
-    public static VersionedN5Reader openLocal(String remotePath, String localPath) throws IOException {
-        return new VersionedN5Reader(remotePath, localPath);
-    }
-
-//    public String getBasePath() {
-//        return this.basePath;
-//    }
 
     public boolean exists(String pathName) {
         Path path = Paths.get(this.kv_directory, pathName);
@@ -310,7 +291,7 @@ public class VersionedN5Reader extends AbstractGsonReader {
 //        /indexes/s0
         String test_data = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dd.v5";
 //        VersionedN5Reader reader = new VersionedN5Reader(test_data);
-        VersionedN5Reader reader = VersionedN5Reader.openMaster(test_data);
+        VersionedN5Reader reader = new VersionedN5Reader(test_data);
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s : resolutions) {
             HashMap<String, JsonElement> att = reader.getAttributes(s);
