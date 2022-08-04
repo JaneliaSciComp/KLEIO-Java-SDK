@@ -60,8 +60,11 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
 
     private String userID;
 
+    public VersionedN5Writer(String basePath) throws IOException {
+        this(basePath, true);
+    }
 
-    protected VersionedN5Writer(String basePath,boolean overwrite) throws IOException {
+    private VersionedN5Writer(String basePath, boolean overwrite) throws IOException {
         super(basePath);
         this.uncommittedBlocks = new ArrayList<>();
 
@@ -95,14 +98,14 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public static VersionedN5Writer openMaster(String basePath) throws IOException {
-        return new VersionedN5Writer(basePath,false);
+        return new VersionedN5Writer(basePath, false);
     }
 
     public static VersionedN5Writer createMaster(String basePath) throws IOException {
-        return new VersionedN5Writer(basePath,true);
+        return new VersionedN5Writer(basePath, true);
     }
 
-    public static VersionedN5Writer openCloned( String remotePath,String localPath) throws IOException {
+    public static VersionedN5Writer openCloned(String remotePath, String localPath) throws IOException {
         return new VersionedN5Writer(Paths.get(remotePath, KV_STORE).toString(), localPath);
     }
 
@@ -113,7 +116,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
 
     public static VersionedN5Writer convert(N5FSWriter reader, String dataset, String result) throws IOException, GitAPIException {
 
-        VersionedN5Writer writer = new VersionedN5Writer(result,true);
+        VersionedN5Writer writer = new VersionedN5Writer(result, true);
 //        create n5 dataset
         List<MultiscaleAttributes> atts = MultiscaleAttributes.generateFromN5(reader, dataset);
         String outputDataset;
@@ -413,7 +416,11 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public void checkoutNewBranch(String name) throws GitAPIException {
-        versionedDirectory.checkout(name,true);
+        versionedDirectory.checkout(name, true);
+    }
+
+    public void checkoutBranch(String name, boolean create) throws GitAPIException {
+        versionedDirectory.checkout(name, create);
     }
 
     public void setUserID(String userID) {
