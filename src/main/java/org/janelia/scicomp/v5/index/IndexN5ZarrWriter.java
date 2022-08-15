@@ -8,6 +8,7 @@ import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.GzipCompression;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
+import org.janelia.scicomp.lib.VersionedDirectory;
 
 import java.io.IOException;
 
@@ -20,6 +21,7 @@ public class IndexN5ZarrWriter extends N5ZarrWriter {
 
     public IndexN5ZarrWriter(String basePath) throws IOException {
         super(basePath);
+        VersionedDirectory.initRepo(basePath);
     }
 
     public void createDataset(String pathName, long[] gridDimensions) throws IOException {

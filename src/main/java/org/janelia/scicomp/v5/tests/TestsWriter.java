@@ -18,8 +18,9 @@ import java.util.HashMap;
 public class TestsWriter {
     final static String inputN5Image = "/Users/zouinkhim/Downloads/car/dataset.n5";
     final static String inputN5Dataset = "setup0/timepoint0";
-    final static String masterV5 = "/Users/zouinkhim/Desktop/active_learning/versioned_data/master.v5";
-    final static String clonedLocalV5 = "/Users/zouinkhim/Desktop/active_learning/versioned_data/cloned.v5";
+    final static String masterIndex = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset.v5/indexes";
+    final static String dataStore = "/Users/zouinkhim/Desktop/active_learning/versioned_data/dataset.v5/dataStore";
+    final static String clonedIndex = "/Users/zouinkhim/Desktop/active_learning/versioned_data/clonedIndexes";
     final static String username = "zouinkhim";
 
     public static void main(String[] args) throws GitAPIException, IOException {
@@ -50,7 +51,7 @@ public class TestsWriter {
 //        writer.incrementSession();
 
         N5FSWriter reader = new N5FSWriter(inputN5Image);
-        VersionedN5Writer writer = VersionedN5Writer.convert(reader, inputN5Dataset, masterV5);
+        VersionedN5Writer writer = VersionedN5Writer.convert(reader, inputN5Dataset, masterIndex,dataStore);
 
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s:resolutions){
@@ -64,10 +65,10 @@ public class TestsWriter {
         }
     }
 
-    private static void cloneMaster() throws IOException {
+    private static void cloneMaster() throws IOException, GitAPIException {
 
 
-        VersionedN5Writer writer = VersionedN5Writer.cloneFrom(masterV5, clonedLocalV5, username);
+        VersionedN5Writer writer = VersionedN5Writer.cloneFrom(masterIndex, clonedIndex,dataStore, username);
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s:resolutions){
             HashMap<String, JsonElement> att = writer.getAttributes(s);

@@ -8,10 +8,11 @@ import java.io.IOException;
 public class CloneRepo {
 
     public static void main(String[] args) throws GitAPIException, IOException {
-    final String remotePath = "";
-    final String localPath = "";
+    final String remoteIndexPath = "";
+        final String localIndexPath = "";
+        final String dataStorePath = "";
     final  String username = "";
-        VersionedN5Writer writer = VersionedN5Writer.cloneFrom(remotePath,localPath,username);
+        VersionedN5Writer writer = VersionedN5Writer.cloneFrom(remoteIndexPath,localIndexPath,dataStorePath,username);
         writer.commit();
     }
 }
