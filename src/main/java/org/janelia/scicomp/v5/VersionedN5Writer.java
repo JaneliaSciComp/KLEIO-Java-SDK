@@ -416,6 +416,14 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
         versionedDirectory.checkout(name, create);
     }
 
+    public String getUserID() {
+        return userID;
+    }
+
+    public String getCurrentBranch() throws IOException {
+       return versionedDirectory.getCurrentBranch();
+    }
+
     public void setUserID(String userID) {
         this.userID = userID;
     }
@@ -427,6 +435,7 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
         String dataStore = "/Users/zouinkhim/Desktop/active_learning/versioned_data/data.v5/dataStore";
         N5FSWriter reader = new N5FSWriter(n5_read);
         VersionedN5Writer writer = VersionedN5Writer.convert(reader, dataset, indexes, dataStore);
+        System.out.println(writer.getCurrentBranch());
         writer.setUserID("zouinkhim");
         writer.commit();
     }

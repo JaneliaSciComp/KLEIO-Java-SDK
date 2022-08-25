@@ -22,6 +22,10 @@ public class VersionedDirectory {
         return new VersionedDirectory(path);
     }
 
+    public String getCurrentBranch() throws IOException {
+        return this.git.getRepository().getBranch();
+    }
+
     public static VersionedDirectory initRepo(String path) throws IOException {
         File file = new File(path);
         if (!file.exists()) {
