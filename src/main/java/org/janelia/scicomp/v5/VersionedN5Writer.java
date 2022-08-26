@@ -402,7 +402,9 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
     }
 
     public void commit() throws GitAPIException {
-        String message = Utils.format(uncommittedBlocks);
+        String message ="initial commit";
+        if(uncommittedBlocks.size()>0)
+            message = Utils.format(uncommittedBlocks);
         //TODO add only uncommitted
         versionedDirectory.addAll();
         versionedDirectory.commit(message);

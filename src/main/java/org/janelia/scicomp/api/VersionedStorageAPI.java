@@ -22,8 +22,8 @@ import java.util.List;
 
 public class VersionedStorageAPI implements Serializable {
 
-    private final static String GIT_FOLDER = "git_indexes";
-    private final static String KV_STORE = "data_kv";
+//    private final static String GIT_FOLDER = "git_indexes";
+//    private final static String KV_STORE = "data_kv";
     private static boolean isVersioned = false;
 
     public static boolean isIsVersioned() {
@@ -129,7 +129,7 @@ public class VersionedStorageAPI implements Serializable {
             multiscaleAttributes.add(attrs);
         }
 
-        VersionedDirectory versionControlledDirectory = VersionedDirectory.cloneFrom(new File(projectPath, GIT_FOLDER).getAbsolutePath(), localPath, username);
+        VersionedDirectory versionControlledDirectory = VersionedDirectory.cloneFrom(projectPath, localPath, username);
         LOG.info("Cloned to : " + localPath);
         MultiScaleZarr versionZarr = new MultiScaleZarr(localPath);
         versionZarr.create(multiscaleAttributes);
@@ -144,12 +144,12 @@ public class VersionedStorageAPI implements Serializable {
     }
 
 
-    public static void cloneProject(@NotNull String projectPath, @NotNull String localPath, @NotNull String username) throws GitAPIException, IOException {
+    public static void cloneProject(@NotNull String projectPath, @NotNull String localPath, @NotNull String username) throws IOException {
         LOG.info("Username :" + username);
         LOG.info("projectPath :" + projectPath);
         LOG.info("localPath :" + localPath);
 
-        VersionedDirectory.cloneFrom(new File(projectPath, GIT_FOLDER).getAbsolutePath(), localPath, username);
+        VersionedDirectory.cloneFrom(projectPath, localPath, username);
 
 //        VersionedDirectory.cloneFrom(projectPath, localPath, username);
         LOG.info("Cloned to : " + localPath);
