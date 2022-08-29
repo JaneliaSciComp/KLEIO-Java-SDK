@@ -9,13 +9,86 @@
         <version>31.1.0</version>
         <relativePath/>
     </parent>
+    <name>Versioned N5</name>
     <groupId>org.janelia.scicomp</groupId>
     <artifactId>versionedn5</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
+    <url>https://github.com/JaneliaSciComp/VersionedN5</url>
+    <description>BigDataViewer-based visualization tool for N5 datasets</description>
+    <inceptionYear>2022</inceptionYear>
+    <organization>
+        <name>HHMI Janelia</name>
+        <url>http://JaneliaSciComp.janelia.org/</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>GNU General Public License v3.0</name>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+
+    <developers>
+        <developer>
+            <id>mzouink</id>
+            <name>Marwan Zouinkhi</name>
+            <email>zouinkhim@janelia.hhmi.org</email>
+            <url />
+            <organization>HHMI Janelia</organization>
+            <organizationUrl>http://janelia.org/</organizationUrl>
+            <roles>
+                <role>founder</role>
+                <role>lead</role>
+                <role>developer</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>John Bogovic</name>
+            <properties>
+                <id>bogovicj</id>
+            </properties>
+        </contributor>
+    </contributors>
+
+    <mailingLists>
+        <mailingList>
+            <name>ImageJ Forum</name>
+            <archive>http://forum.imagej.net/</archive>
+        </mailingList>
+    </mailingLists>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/JaneliaSciComp/VersionedN5/issues</url>
+    </issueManagement>
+
+
+    <ciManagement>
+        <system>GitHub Actions</system>
+        <url>https://github.com/saJaneliaSciComp/VersionedN5/actions</url>
+    </ciManagement>
+
+    <scm>
+        <connection>scm:git:https://github.com/JaneliaSciComp/VersionedN5</connection>
+        <developerConnection>scm:git:git@github.com:JaneliaSciComp/VersionedN5.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/JaneliaSciComp/VersionedN5</url>
+    </scm>
+
+
     <repositories>
         <repository>
             <id>scijava.public</id>
             <url>https://maven.scijava.org/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
     <dependencies>
@@ -23,6 +96,12 @@
             <groupId>org.janelia.saalfeldlab</groupId>
             <artifactId>n5-viewer_fiji</artifactId>
             <version>4.5.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.janelia.saalfeldlab</groupId>
+                    <artifactId>n5-zarr</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
@@ -39,15 +118,16 @@
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>6.1.0.202203080745-r</version>
+            <version>5.9.0.202009080501-r</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit.ssh.jsch</artifactId>
-            <version>6.1.0.202203080745-r</version>
+            <version>5.9.0.202009080501-r</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -65,14 +145,20 @@
             <version>2.9.0</version>
         </dependency>
         <dependency>
-            <groupId>org.janelia.saalfeldlab</groupId>
+            <groupId>com.github.saalfeldlab</groupId>
             <artifactId>n5-zarr</artifactId>
-            <version>0.0.8.1-SNAPSHOT</version>
+            <version>2f4dc63</version>
         </dependency>
         <dependency>
             <groupId>org.janelia.saalfeldlab</groupId>
             <artifactId>n5-utils</artifactId>
             <version>0.0.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.janelia.saalfeldlab</groupId>
+                    <artifactId>n5-zarr</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Test dependencies -->
         <dependency>
@@ -92,6 +178,11 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <license.licenseName>gpl_v3</license.licenseName>
+        <license.projectName>Versioned N5</license.projectName>
+        <license.organizationName>HHMI Janelia</license.organizationName>
+        <license.copyrightOwners>Marwan Zouinkhi</license.copyrightOwners>
+
     </properties>
 
 <build>
