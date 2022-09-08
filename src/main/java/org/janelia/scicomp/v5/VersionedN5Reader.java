@@ -77,7 +77,7 @@ public class VersionedN5Reader extends AbstractGsonReader {
 
 
     public String getVersionedUrl(){
-        return V5URI.format(versionIndexPath,dataStorePath);
+        return new V5URI(versionIndexPath,dataStorePath).get();
     }
     public VersionedN5Reader(String versionIndexPath, String dataStorePath) throws IOException {
         this(versionIndexPath, dataStorePath, new GsonBuilder());

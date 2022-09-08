@@ -4,15 +4,21 @@ import java.io.IOException;
 import java.net.URI;
 
 public class V5URI {
-    private final String versionedIndexPath;
-    private final String dataStorePath;
+    private final String indexesPath;
+    private final String keyValueStorePath;
+
+    public V5URI(String indexesPath, String keyValueStorePath) {
+        this.indexesPath = indexesPath;
+        this.keyValueStorePath = keyValueStorePath;
+    }
 
     public V5URI(URI uri) throws IOException {
         try {
             if (uri.getScheme().equals("v5")) {
-                String[] parts = uri.toString().split(":");
-                this.versionedIndexPath = parts[1];
-                this.dataStorePath = parts[2];
+                // "::" added to fix windows bug Z:/
+                String[] parts = uri.toString().split("::");
+                this.indexesPath = parts[1];
+                this.keyValueStorePath = parts[2];
             } else {
                 throw new IOException("Invalid Versioned URI pattern V5:INDEX_PATH:DATA_PATH yours: " + uri);
             }
@@ -21,15 +27,17 @@ public class V5URI {
         }
     }
 
-    public static String format(String versionIndexPath, String dataStorePath) {
-        return String.format("v5:%s:%s", versionIndexPath, dataStorePath);
+    public String get() {
+        return String.format("v5::%s::%s", indexesPath, keyValueStorePath);
     }
 
+    @Deprecated
     public String getDataStorePath() {
-        return dataStorePath;
+        return keyValueStorePath;
     }
 
+    @Deprecated
     public String getVersionedIndexPath() {
-        return versionedIndexPath;
+        return indexesPath;
     }
 }
