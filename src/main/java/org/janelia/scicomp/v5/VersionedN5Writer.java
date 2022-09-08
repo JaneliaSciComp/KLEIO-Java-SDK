@@ -85,8 +85,12 @@ public class VersionedN5Writer extends VersionedN5Reader implements N5Writer {
         System.out.println("done..");
     }
 
-    public VersionedN5Writer(URI uri) throws IOException {
-        this(new V5URI(uri).getVersionedIndexPath(), new V5URI(uri).getDataStorePath());
+    public VersionedN5Writer(String uri) throws IOException {
+        this(new V5URI(uri));
+    }
+
+    public VersionedN5Writer(V5URI v5URI) throws IOException {
+       this(v5URI.getIndexesPath(),v5URI.getKeyValueStorePath());
     }
 
 //    public static VersionedN5Writer openMaster(String basePath) throws IOException {

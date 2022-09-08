@@ -75,16 +75,20 @@ public class VersionedN5Reader extends AbstractGsonReader {
         }
     }
 
+    public VersionedN5Reader(V5URI v5URI) throws IOException {
+        this(v5URI.getIndexesPath(),v5URI.getKeyValueStorePath());
+    }
+
 
     public String getVersionedUrl(){
-        return new V5URI(versionIndexPath,dataStorePath).get();
+        return new V5URI(versionIndexPath,dataStorePath).getURI();
     }
     public VersionedN5Reader(String versionIndexPath, String dataStorePath) throws IOException {
         this(versionIndexPath, dataStorePath, new GsonBuilder());
     }
 
-    public VersionedN5Reader(URI uri) throws IOException {
-        this(new V5URI(uri).getVersionedIndexPath(), new V5URI(uri).getDataStorePath());
+    public VersionedN5Reader(String uri) throws IOException {
+        this(new V5URI(uri));
     }
 
     public boolean exists(String pathName) {

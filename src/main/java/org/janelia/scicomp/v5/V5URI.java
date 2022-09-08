@@ -1,9 +1,13 @@
 package org.janelia.scicomp.v5;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 public class V5URI {
+    public static final String PREFIX = "V5:" ;
     private final String indexesPath;
     private final String keyValueStorePath;
 
@@ -12,28 +16,43 @@ public class V5URI {
         this.keyValueStorePath = keyValueStorePath;
     }
 
-    public V5URI(URI uri) throws IOException {
+    public V5URI(String uri) throws IOException {
+        if (!uri.startsWith(PREFIX))
+            throw new IOException("Invalid V5 URI: "+uri);
         try {
-            if (uri.getScheme().equals("v5")) {
-                // "::" added to fix windows bug Z:/
-                String[] parts = uri.toString().split("::");
-                this.indexesPath = parts[1];
-                this.keyValueStorePath = parts[2];
-            } else {
-                throw new IOException("Invalid Versioned URI pattern V5:INDEX_PATH:DATA_PATH yours: " + uri);
-            }
-        } catch (Exception e) {
-            throw new IOException("Invalid Versioned URI pattern V5:INDEX_PATH:DATA_PATH yours: " + uri + "\nexception: " + e);
+            uri = uri.substring(PREFIX.length());
+            V5URI v5uri = new Gson().fromJson(uri, V5URI.class);
+            this.indexesPath = v5uri.getIndexesPath();
+            this.keyValueStorePath = v5uri.getKeyValueStorePath();
+        }catch (Exception e){
+            throw new IOException("Invalid V5 URI: "+uri);
         }
+    }
+
+    public static boolean isV5(String url) {
+        try {
+            new V5URI(url);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    public String getIndexesPath() {
+        return indexesPath;
+    }
+
+    public String getKeyValueStorePath() {
+        return keyValueStorePath;
     }
 
     @Deprecated
     public static String format(String indexesPath, String keyValueStorePath){
-        return new V5URI(indexesPath,keyValueStorePath).get();
+        return new V5URI(indexesPath,keyValueStorePath).getURI();
     }
 
-    public String get() {
-        return String.format("v5::%s::%s", indexesPath, keyValueStorePath);
+    public String getURI() {
+        return String.format("%s%s",PREFIX, new Gson().toJson(this));
     }
 
     @Deprecated
@@ -44,5 +63,14 @@ public class V5URI {
     @Deprecated
     public String getVersionedIndexPath() {
         return indexesPath;
+    }
+
+    public static void main(String[] args) throws IOException {
+        V5URI v5URI1 = new V5URI("Z:\\jonesa\\versioned_data\\jrc_mus-kidney\\versionedIndex","Z:\\jonesa\\versioned_data\\jrc_mus-kidney\\datastore");
+        String uri = v5URI1.getURI();
+        System.out.println(uri);
+        V5URI v5URI2 = new V5URI(uri);
+        System.out.println(v5URI2.getIndexesPath());
+
     }
 }
