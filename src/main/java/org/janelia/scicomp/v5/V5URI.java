@@ -27,6 +27,11 @@ public class V5URI {
         }
     }
 
+    @Deprecated
+    public static String format(String indexesPath, String keyValueStorePath){
+        return new V5URI(indexesPath,keyValueStorePath).get();
+    }
+
     public String get() {
         return String.format("v5::%s::%s", indexesPath, keyValueStorePath);
     }
