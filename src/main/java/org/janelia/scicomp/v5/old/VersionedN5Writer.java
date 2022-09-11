@@ -23,7 +23,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.janelia.scicomp.v5;
+package org.janelia.scicomp.v5.old;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -37,11 +37,10 @@ import org.janelia.scicomp.lib.MultiscaleAttributes;
 import org.janelia.scicomp.lib.SessionId;
 import org.janelia.scicomp.lib.VersionedDirectory;
 import org.janelia.scicomp.lib.tools.Utils;
-import org.janelia.scicomp.v5.index.IndexN5ZarrWriter;
-import org.jetbrains.annotations.NotNull;
+import org.janelia.scicomp.v5.asbtract.uri.V5URI;
+import org.janelia.scicomp.v5.old.index.IndexN5ZarrWriter;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;

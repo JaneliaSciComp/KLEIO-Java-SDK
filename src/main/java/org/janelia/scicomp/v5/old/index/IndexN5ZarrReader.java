@@ -1,4 +1,4 @@
-package org.janelia.scicomp.v5.index;
+package org.janelia.scicomp.v5.old.index;
 
 import com.google.gson.GsonBuilder;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;

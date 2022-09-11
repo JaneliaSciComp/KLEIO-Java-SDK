@@ -23,22 +23,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.janelia.scicomp.v5;
+package org.janelia.scicomp.v5.old;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
-import net.imglib2.type.numeric.real.FloatType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
+import org.janelia.scicomp.v5.asbtract.uri.V5FSURL;
+import org.janelia.scicomp.v5.asbtract.uri.V5FSURL;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.OverlappingFileLockException;
@@ -75,20 +74,20 @@ public class VersionedN5Reader extends AbstractGsonReader {
         }
     }
 
-    public VersionedN5Reader(V5URI v5URI) throws IOException {
-        this(v5URI.getIndexesPath(),v5URI.getKeyValueStorePath());
+    public VersionedN5Reader(V5FSURL V5FSURL) throws IOException {
+        this(V5FSURL.getIndexesPath(),V5FSURL.getKeyValueStorePath());
     }
 
 
     public String getVersionedUrl(){
-        return new V5URI(versionIndexPath,dataStorePath).getURI();
+        return new V5FSURL(versionIndexPath,dataStorePath).getURL();
     }
     public VersionedN5Reader(String versionIndexPath, String dataStorePath) throws IOException {
         this(versionIndexPath, dataStorePath, new GsonBuilder());
     }
 
     public VersionedN5Reader(String uri) throws IOException {
-        this(new V5URI(uri));
+        this(new V5FSURL(uri));
     }
 
     public boolean exists(String pathName) {

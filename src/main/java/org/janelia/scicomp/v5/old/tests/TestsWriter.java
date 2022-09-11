@@ -1,16 +1,13 @@
-package org.janelia.scicomp.v5.tests;
+package org.janelia.scicomp.v5.old.tests;
 
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.janelia.saalfeldlab.N5Factory;
-import org.janelia.saalfeldlab.n5.N5DatasetDiscoverer;
 import org.janelia.saalfeldlab.n5.N5FSWriter;
-import org.janelia.saalfeldlab.n5.ij.N5IJUtils;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.VersionedN5Writer;
+import org.janelia.scicomp.v5.old.VersionedN5Writer;
 
 import java.io.IOException;
 import java.util.HashMap;
