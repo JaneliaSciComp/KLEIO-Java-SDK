@@ -13,12 +13,12 @@ import javax.ws.rs.core.UriBuilder;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SessionId {
-        private final static boolean TESTING = true;
-    private static UnsignedLongType currentId;
+        private final static boolean TESTING = false;
+//    private static UnsignedLongType currentId;
 
     private static final String API_LINK = "http://c13u06.int.janelia.org:8000/v1/id";
 
-    private static UnsignedLongType getNextId() {
+    public static UnsignedLongType getNextId() {
         if(TESTING)
             return new UnsignedLongType(ThreadLocalRandom.current().nextInt(10, 1000 ));
         final ClientConfig clientConfig = new DefaultClientConfig();
@@ -38,26 +38,26 @@ public class SessionId {
         return new UnsignedLongType(s.get("id").getAsBigInteger());
     }
 
-    public static UnsignedLongType get() {
-        if (currentId == null) {
-            currentId = getNextId();
-        }
-        return currentId;
-    }
-
-    public static UnsignedLongType incrementAndGet(){
-        currentId = getNextId();
-        return currentId;
-    }
-
-    @Override
-    public String toString() {
-        return "SessionId{" +
-                "id=" + currentId +
-                '}';
-    }
+//    public static UnsignedLongType get() {
+//        if (currentId == null) {
+//            currentId = getNextId();
+//        }
+//        return currentId;
+//    }
+//
+//    public static UnsignedLongType incrementAndGet(){
+//        currentId = getNextId();
+//        return currentId;
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return "SessionId{" +
+//                "id=" + currentId +
+//                '}';
+//    }
 
     public static void main(String[] args) {
-        System.out.println(get());
+        System.out.println(getNextId());
     }
 }

@@ -29,20 +29,15 @@ import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.janelia.saalfeldlab.n5.DataBlock;
-import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.GsonAttributesParser;
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
-import org.janelia.scicomp.v5.asbtract.AbstractV5Reader;
+import org.janelia.scicomp.v5.asbtract.AbstractV5FSReader;
 import org.janelia.scicomp.v5.asbtract.uri.V5FSURL;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -51,9 +46,16 @@ import java.util.HashMap;
  *
  * @author Marwan Zouinkhi
  */
-public class V5FSReader extends AbstractV5Reader<N5ZarrReader,N5FSReader> {
+
+
+//TODO add overwrite annotation
+public class V5FSReader extends AbstractV5FSReader<N5ZarrReader, N5FSReader> {
     public V5FSReader(String versionIndexPath, String dataStorePath) throws IOException {
-        super(new N5ZarrReader(versionIndexPath),new N5FSReader(dataStorePath), new V5FSURL(versionIndexPath,dataStorePath));
+        this(new N5ZarrReader(versionIndexPath), new N5FSReader(dataStorePath), new V5FSURL(versionIndexPath, dataStorePath));
+    }
+
+    protected V5FSReader(N5ZarrReader indexStore, N5FSReader rawStore, V5FSURL url) throws IOException {
+        super(indexStore, rawStore, url);
         if (this.exists("/")) {
             Version version = this.getVersion();
             if (!VERSION.isCompatible(version)) {
@@ -63,56 +65,37 @@ public class V5FSReader extends AbstractV5Reader<N5ZarrReader,N5FSReader> {
     }
 
     public V5FSReader(V5FSURL v5FSURL) throws IOException {
-        this(v5FSURL.getIndexesPath(),v5FSURL.getKeyValueStorePath());
+        this(v5FSURL.getIndexesPath(), v5FSURL.getKeyValueStorePath());
     }
-
-    public String getVersionedUrl(){
-        return url.getURL();
-    }
-
 
     public <T> T getAttribute(String pathName, String key, Class<T> clazz) throws IOException {
-        HashMap<String, JsonElement> map = rawData.getAttributes(pathName);
-        return GsonAttributesParser.parseAttribute(map, key, clazz, rawData.getGson());
+        HashMap<String, JsonElement> map = rawReader.getAttributes(pathName);
+        return GsonAttributesParser.parseAttribute(map, key, clazz, rawReader.getGson());
     }
 
     public <T> T getAttribute(String pathName, String key, Type type) throws IOException {
-        HashMap<String, JsonElement> map = rawData.getAttributes(pathName);
-        return GsonAttributesParser.parseAttribute(map, key, type, rawData.getGson());
+        HashMap<String, JsonElement> map = rawReader.getAttributes(pathName);
+        return GsonAttributesParser.parseAttribute(map, key, type, rawReader.getGson());
     }
 
-    public DataBlock<?> readBlock(String pathName, DatasetAttributes datasetAttributes, long... gridPosition) throws IOException {
-        long version = getBlockVersion(pathName, gridPosition);
-        if(version==0) {
-            return null;
-        }
-
-        Path versionedPath = Paths.get(pathName, String.valueOf(version));
-
-        return rawData.readBlock(versionedPath.toString(),datasetAttributes,gridPosition);
-
-    }
-
+    @Override
     public String[] list(String pathName) throws IOException {
-        return Arrays.stream(super.list(pathName)).filter( x -> !x.contains(".")).toArray(String[]::new);
+        return Arrays.stream(super.list(pathName)).filter(x -> !x.contains(".")).toArray(String[]::new);
     }
-
 
     public HashMap<String, JsonElement> getAttributes(String pathName) throws IOException {
-        return rawData.getAttributes(pathName);
+        return rawReader.getAttributes(pathName);
     }
 
-
-    public static void main(String[] args) throws IOException, GitAPIException {
+    public static void main(String[] args) throws Exception {
 //        /indexes/s0
-        String indexesPath  = "/Users/zouinkhim/Desktop/tmp_test_versioned/car/data/indexes";
-        String dataPath = "/Users/zouinkhim/Desktop/tmp_test_versioned/car/data/dataStore";
+        String indexesPath = "/Users/zouinkhim/Desktop/active_learning/versioned_data/fsdata/indexes";
+        String dataPath = "/Users/zouinkhim/Desktop/active_learning/versioned_data/fsdata//dataStore";
         V5FSReader reader = new V5FSReader(indexesPath, dataPath);
         System.out.println(reader.getVersionedUrl());
         String[] all = reader.list("/");
-        HashMap<String, JsonElement> x = reader.getAttributes("s0");
         System.out.println("all");
-        System.out.println(String.join("-",all));
+        System.out.println(String.join("-", all));
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s : resolutions) {
             HashMap<String, JsonElement> att = reader.getAttributes(s);
