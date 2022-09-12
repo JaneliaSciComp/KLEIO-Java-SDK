@@ -59,13 +59,18 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
     }
 
     //TODO optimize this change to read block write block
-    @Override
-    public void set(String dataset, long[] gridPosition) throws IOException {
+    public void set(String dataset, long[] gridPosition,UnsignedLongType value) throws IOException {
         CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(this, dataset);
         UnsignedLongType p = img.getAt(gridPosition);
-        p.set(getCurrentSession());
+        p.set(value);
         DatasetAttributes attrs = this.getDatasetAttributes(dataset);
         N5Utils.save(img, this, dataset, attrs.getBlockSize(), attrs.getCompression());  }
+
+
+    @Override
+    public void set(String pathName, long[] gridPosition) throws IOException {
+        this.set(pathName,gridPosition,getCurrentSession());
+    }
 
     @Override
     public <T> void writeBlock(String pathName, DatasetAttributes datasetAttributes, DataBlock<T> dataBlock) throws IOException {
@@ -73,7 +78,14 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
         versionManger.addUncommittedBlock(dataBlock.getGridPosition());
     }
 
+    @Override
+    public DatasetAttributes getDatasetAttributes(String pathName) throws IOException {
+        return super.getDatasetAttributes(pathName);
+    }
+
     public void createDataset(String pathName, long[] gridDimensions) throws IOException {
         super.createDataset(pathName,gridDimensions,indexMatrixBlockSize,indexMatrixDataType,indexMatrixCompression);
     }
+
+
 }

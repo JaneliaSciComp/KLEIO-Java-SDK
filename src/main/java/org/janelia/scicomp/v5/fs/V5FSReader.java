@@ -29,11 +29,13 @@ import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.GsonAttributesParser;
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
 import org.janelia.scicomp.v5.lib.AbstractV5FSReader;
+import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 
 import java.io.IOException;
@@ -51,7 +53,7 @@ import java.util.HashMap;
 //TODO add overwrite annotation
 public class V5FSReader extends AbstractV5FSReader<N5ZarrReader, N5FSReader> {
     public V5FSReader(String versionIndexPath, String dataStorePath) throws IOException {
-        this(new N5ZarrReader(versionIndexPath), new N5FSReader(dataStorePath), new V5FSURL(versionIndexPath, dataStorePath));
+        this(new N5ZarrIndexWriter(versionIndexPath), new N5FSReader(dataStorePath), new V5FSURL(versionIndexPath, dataStorePath));
     }
 
     protected V5FSReader(N5ZarrReader indexStore, N5FSReader rawStore, V5FSURL url) throws IOException {
@@ -69,13 +71,13 @@ public class V5FSReader extends AbstractV5FSReader<N5ZarrReader, N5FSReader> {
     }
 
     public <T> T getAttribute(String pathName, String key, Class<T> clazz) throws IOException {
-        HashMap<String, JsonElement> map = rawReader.getAttributes(pathName);
-        return GsonAttributesParser.parseAttribute(map, key, clazz, rawReader.getGson());
+        HashMap<String, JsonElement> map = getRawReader().getAttributes(pathName);
+        return GsonAttributesParser.parseAttribute(map, key, clazz, getRawReader().getGson());
     }
 
     public <T> T getAttribute(String pathName, String key, Type type) throws IOException {
-        HashMap<String, JsonElement> map = rawReader.getAttributes(pathName);
-        return GsonAttributesParser.parseAttribute(map, key, type, rawReader.getGson());
+        HashMap<String, JsonElement> map = getRawReader().getAttributes(pathName);
+        return GsonAttributesParser.parseAttribute(map, key, type, getRawReader().getGson());
     }
 
     @Override
@@ -84,7 +86,12 @@ public class V5FSReader extends AbstractV5FSReader<N5ZarrReader, N5FSReader> {
     }
 
     public HashMap<String, JsonElement> getAttributes(String pathName) throws IOException {
-        return rawReader.getAttributes(pathName);
+        return getRawReader().getAttributes(pathName);
+    }
+
+    @Override
+    public DatasetAttributes getDatasetAttributes(String pathName) throws IOException {
+        return getRawReader().getDatasetAttributes(pathName);
     }
 
     public static void main(String[] args) throws Exception {
