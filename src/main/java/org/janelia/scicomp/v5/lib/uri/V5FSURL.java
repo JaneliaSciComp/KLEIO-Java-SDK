@@ -1,4 +1,4 @@
-package org.janelia.scicomp.v5.asbtract.uri;
+package org.janelia.scicomp.v5.lib.uri;
 
 import com.google.gson.Gson;
 

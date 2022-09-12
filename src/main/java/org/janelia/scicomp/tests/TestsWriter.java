@@ -1,4 +1,4 @@
-package org.janelia.scicomp.v5.old.tests;
+package org.janelia.scicomp.tests;
 
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
@@ -7,7 +7,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.saalfeldlab.n5.N5FSWriter;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.V5FSWriter;
+import org.janelia.scicomp.v5.fs.V5FSWriter;
 
 import java.io.IOException;
 import java.util.HashMap;

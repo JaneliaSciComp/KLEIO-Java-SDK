@@ -1,7 +1,8 @@
-package org.janelia.scicomp.v5.asbtract;
+package org.janelia.scicomp.v5.lib;
 
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.N5Writer;
+import org.janelia.scicomp.v5.lib.indexes.V5IndexWriter;
 
 import java.io.IOException;
 

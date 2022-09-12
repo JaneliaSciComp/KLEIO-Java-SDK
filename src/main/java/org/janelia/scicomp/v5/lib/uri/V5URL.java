@@ -1,4 +1,4 @@
-package org.janelia.scicomp.v5.asbtract.uri;
+package org.janelia.scicomp.v5.lib.uri;
 
 public interface V5URL {
     public static final String PREFIX = "V5:";

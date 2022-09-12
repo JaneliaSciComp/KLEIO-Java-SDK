@@ -23,7 +23,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.janelia.scicomp.v5;
+package org.janelia.scicomp.v5.fs;
 
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
@@ -33,8 +33,8 @@ import org.janelia.saalfeldlab.n5.GsonAttributesParser;
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
-import org.janelia.scicomp.v5.asbtract.AbstractV5FSReader;
-import org.janelia.scicomp.v5.asbtract.uri.V5FSURL;
+import org.janelia.scicomp.v5.lib.AbstractV5FSReader;
+import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

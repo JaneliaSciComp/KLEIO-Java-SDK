@@ -1,10 +1,10 @@
-package org.janelia.scicomp.v5.asbtract.lib;
+package org.janelia.scicomp.v5.lib.vc;
 
 
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
-import org.janelia.scicomp.lib.tools.Utils;
+import org.janelia.scicomp.v5.lib.tools.Utils;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.janelia.scicomp.v5;
+package org.janelia.scicomp.v5.lib.indexes;
 
 import com.google.gson.GsonBuilder;
 import net.imglib2.cache.img.CachedCellImg;
@@ -6,8 +6,7 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
-import org.janelia.scicomp.v5.asbtract.V5IndexWriter;
-import org.janelia.scicomp.v5.asbtract.lib.GitV5VersionManger;
+import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package org.janelia.scicomp.lib;
+package org.janelia.scicomp.v5.lib.tools;
 
 import org.janelia.saalfeldlab.n5.N5DatasetDiscoverer;
 import org.janelia.saalfeldlab.n5.N5Reader;

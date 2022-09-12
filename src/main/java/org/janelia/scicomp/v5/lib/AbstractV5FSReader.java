@@ -1,11 +1,11 @@
-package org.janelia.scicomp.v5.asbtract;
+package org.janelia.scicomp.v5.lib;
 
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.DataBlock;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.asbtract.uri.V5URL;
+import org.janelia.scicomp.v5.lib.uri.V5URL;
 
 import java.io.IOException;
 import java.nio.file.Path;

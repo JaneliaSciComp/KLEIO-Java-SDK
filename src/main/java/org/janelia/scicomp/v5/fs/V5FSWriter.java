@@ -1,4 +1,4 @@
-package org.janelia.scicomp.v5;
+package org.janelia.scicomp.v5.fs;
 
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.cell.CellGrid;
@@ -7,10 +7,11 @@ import org.janelia.saalfeldlab.n5.DataBlock;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5FSWriter;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.lib.MultiscaleAttributes;
-import org.janelia.scicomp.v5.asbtract.V5Writer;
-import org.janelia.scicomp.v5.asbtract.lib.GitV5VersionManger;
-import org.janelia.scicomp.v5.asbtract.uri.V5FSURL;
+import org.janelia.scicomp.v5.lib.tools.MultiscaleAttributes;
+import org.janelia.scicomp.v5.lib.V5Writer;
+import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
+import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
+import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 
 import java.io.IOException;
 import java.nio.file.Path;
