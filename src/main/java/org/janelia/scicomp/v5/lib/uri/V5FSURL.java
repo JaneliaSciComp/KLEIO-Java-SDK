@@ -3,6 +3,8 @@ package org.janelia.scicomp.v5.lib.uri;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class V5FSURL implements V5URL {
     private final String indexesPath;
@@ -51,6 +53,13 @@ public class V5FSURL implements V5URL {
     @Override
     public String getURL() {
         return String.format("%s%s", PREFIX, new Gson().toJson(this));
+    }
+
+    @Override
+    public V5FSURL forDataset(String dataset) {
+        Path newIndexesPath = Paths.get(indexesPath, dataset);
+        Path newKeyValueStorePath = Paths.get(keyValueStorePath, dataset);
+        return new V5FSURL(newIndexesPath.toString(),newKeyValueStorePath.toString());
     }
 
     @Deprecated

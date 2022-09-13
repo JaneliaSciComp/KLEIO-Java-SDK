@@ -132,7 +132,9 @@ public class GitV5VersionManger extends V5VersionManager {
 
     @Override
     public void commitAll() throws IOException {
-        String message = Utils.format(uncommittedBlocks);
+        String message = "init";
+        if (!uncommittedBlocks.isEmpty())
+            message = Utils.format(uncommittedBlocks);
         addAll();
         commit(message);
     }

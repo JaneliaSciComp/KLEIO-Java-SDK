@@ -12,7 +12,7 @@
     <name>Versioned N5</name>
     <groupId>org.janelia.scicomp</groupId>
     <artifactId>versionedn5</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <url>https://github.com/JaneliaSciComp/VersionedN5</url>
     <description>BigDataViewer-based visualization tool for N5 datasets</description>
     <inceptionYear>2022</inceptionYear>
