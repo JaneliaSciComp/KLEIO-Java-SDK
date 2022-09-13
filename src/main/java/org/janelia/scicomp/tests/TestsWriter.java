@@ -1,16 +1,13 @@
-package org.janelia.scicomp.v5.tests;
+package org.janelia.scicomp.tests;
 
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.janelia.saalfeldlab.N5Factory;
-import org.janelia.saalfeldlab.n5.N5DatasetDiscoverer;
 import org.janelia.saalfeldlab.n5.N5FSWriter;
-import org.janelia.saalfeldlab.n5.ij.N5IJUtils;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.VersionedN5Writer;
+import org.janelia.scicomp.v5.fs.V5FSWriter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,7 +20,7 @@ public class TestsWriter {
     final static String clonedIndex = "/Users/zouinkhim/Desktop/active_learning/versioned_data/clonedIndexes";
     final static String username = "zouinkhim";
 
-    public static void main(String[] args) throws GitAPIException, IOException {
+    public static void main(String[] args) throws Exception {
 //        convertN5ToVersioned();
         cloneMaster();
     }
@@ -51,7 +48,7 @@ public class TestsWriter {
 //        writer.incrementSession();
 
         N5FSWriter reader = new N5FSWriter(inputN5Image);
-        VersionedN5Writer writer = VersionedN5Writer.convert(reader, inputN5Dataset, masterIndex,dataStore);
+        V5FSWriter writer = V5FSWriter.convert(reader, inputN5Dataset, masterIndex,dataStore);
 
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s:resolutions){
@@ -65,10 +62,10 @@ public class TestsWriter {
         }
     }
 
-    private static void cloneMaster() throws IOException, GitAPIException {
+    private static void cloneMaster() throws Exception {
 
 
-        VersionedN5Writer writer = VersionedN5Writer.cloneFrom(masterIndex, clonedIndex,dataStore, username);
+        V5FSWriter writer = V5FSWriter.cloneFrom(masterIndex, clonedIndex,dataStore, username);
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s:resolutions){
             HashMap<String, JsonElement> att = writer.getAttributes(s);
