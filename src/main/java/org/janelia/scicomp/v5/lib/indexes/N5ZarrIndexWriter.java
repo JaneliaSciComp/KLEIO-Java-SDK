@@ -1,14 +1,45 @@
+/*
+ * *
+ *  * Copyright (c) 2022, Janelia
+ *  * All rights reserved.
+ *  *
+ *  * Redistribution and use in source and binary forms, with or without
+ *  * modification, are permitted provided that the following conditions are met:
+ *  *
+ *  * 1. Redistributions of source code must retain the above copyright notice,
+ *  *    this list of conditions and the following disclaimer.
+ *  * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *  *    this list of conditions and the following disclaimer in the documentation
+ *  *    and/or other materials provided with the distribution.
+ *  *
+ *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ *  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package org.janelia.scicomp.v5.lib.indexes;
 
 import com.google.gson.GsonBuilder;
+import net.imglib2.FinalInterval;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
+import net.imglib2.view.Views;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<GitV5VersionManger> {
     protected UnsignedLongType session;
@@ -59,12 +90,22 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
     }
 
     //TODO optimize this change to read block write block
-    public void set(String dataset, long[] gridPosition,UnsignedLongType value) throws IOException {
-        CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(this, dataset);
-        UnsignedLongType p = img.getAt(gridPosition);
-        p.set(value);
-        DatasetAttributes attrs = this.getDatasetAttributes(dataset);
-        N5Utils.save(img, this, dataset, attrs.getBlockSize(), attrs.getCompression());  }
+    public void set(String dataset, long[] gridPosition, UnsignedLongType value) throws IOException {
+
+            CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(this, dataset);
+            UnsignedLongType p = img.getAt(gridPosition);
+            p.set(value);
+//        DatasetAttributes attrs = this.getDatasetAttributes(dataset);
+        try {
+            N5Utils.saveRegion(Views.interval(img, new FinalInterval(gridPosition, new long[]{1, 1, 1})), this, dataset);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+//        N5Utils.save(img, this, dataset, attrs.getBlockSize(), attrs.getCompression());
+    }
 
 
     @Override
