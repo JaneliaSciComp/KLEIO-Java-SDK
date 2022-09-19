@@ -49,6 +49,7 @@ public abstract class V5VersionManager {
         this.userID = userID;
     }
 
+    //stage
     public void addUncommittedBlock(long[] position) {
         this.uncommittedBlocks.add(position);
     }
@@ -56,6 +57,7 @@ public abstract class V5VersionManager {
     public void resetUncommittedBlock() {
         this.uncommittedBlocks.clear();
     }
+
 
     public abstract void commitAll() throws IOException;
 

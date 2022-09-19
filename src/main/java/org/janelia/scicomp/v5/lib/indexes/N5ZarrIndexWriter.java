@@ -113,17 +113,6 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
         this.set(pathName,gridPosition,getCurrentSession());
     }
 
-    @Override
-    public <T> void writeBlock(String pathName, DatasetAttributes datasetAttributes, DataBlock<T> dataBlock) throws IOException {
-        super.writeBlock(pathName, datasetAttributes, dataBlock);
-        versionManger.addUncommittedBlock(dataBlock.getGridPosition());
-    }
-
-    @Override
-    public DatasetAttributes getDatasetAttributes(String pathName) throws IOException {
-        return super.getDatasetAttributes(pathName);
-    }
-
     public void createDataset(String pathName, long[] gridDimensions) throws IOException {
         super.createDataset(pathName,gridDimensions,indexMatrixBlockSize,indexMatrixDataType,indexMatrixCompression);
     }
