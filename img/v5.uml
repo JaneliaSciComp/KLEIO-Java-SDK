@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>/Users/zouinkhim/Desktop/active_learning/janus_jclient</OriginalElement>
+  <nodes>
+    <node x="78.0" y="444.0">org.janelia.scicomp.tests.TestsWriter</node>
+    <node x="254.0" y="293.0">org.janelia.scicomp.v5.lib.tools.MultiscaleAttributes</node>
+    <node x="-129.0" y="444.0">org.janelia.scicomp.v5.lib.tools.MultiScaleZarr</node>
+    <node x="196.875" y="220.0">org.janelia.scicomp.v5.fs.V5FSWriter</node>
+    <node x="-45.0" y="64.0">org.janelia.scicomp.v5.lib.indexes.V5IndexWriter</node>
+    <node x="96.0" y="293.0">org.janelia.scicomp.v5.lib.uri.V5URL</node>
+    <node x="260.0" y="444.0">org.janelia.scicomp.v5.lib.tools.SessionId</node>
+    <node x="170.0" y="64.0">org.janelia.scicomp.v5.lib.vc.GitV5VersionManger</node>
+    <node x="432.0" y="444.0">org.janelia.scicomp.v5.lib.tools.Utils</node>
+    <node x="-129.0" y="142.0">org.janelia.scicomp.v5.lib.V5Writer</node>
+    <node x="86.0" y="371.0">org.janelia.scicomp.v5.lib.uri.V5FSURL</node>
+    <node x="442.0" y="-14.0">org.janelia.scicomp.v5.lib.V5Reader</node>
+    <node x="455.5" y="142.0">org.janelia.scicomp.v5.fs.V5FSReader</node>
+    <node x="65.50000000000003" y="-14.0">org.janelia.scicomp.v5.lib.vc.V5VersionManager</node>
+    <node x="-105.5" y="371.0">org.janelia.scicomp.v5.V5FSTest</node>
+    <node x="399.0" y="64.0">org.janelia.scicomp.v5.lib.AbstractV5FSReader</node>
+    <node x="55.00000000000003" y="142.0">org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter</node>
+    <node x="-129.0" y="293.0">org.janelia.scicomp.v5.AbstractN5Test</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.janelia.scicomp.v5.fs.V5FSWriter" target="org.janelia.scicomp.v5.lib.V5Writer" relationship="REALIZATION">
+      <point x="-34.5" y="-14.0" />
+      <point x="231.375" y="195.0" />
+      <point x="-47.0" y="195.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.fs.V5FSWriter" target="org.janelia.scicomp.v5.fs.V5FSReader" relationship="GENERALIZATION">
+      <point x="34.5" y="-14.0" />
+      <point x="300.375" y="195.0" />
+      <point x="528.0" y="195.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.fs.V5FSReader" target="org.janelia.scicomp.v5.lib.AbstractV5FSReader" relationship="GENERALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.lib.indexes.V5IndexWriter" target="org.janelia.scicomp.v5.lib.vc.V5VersionManager" relationship="DEPENDENCY">
+      <point x="0.0" y="-14.0" />
+      <point x="52.5" y="39.0" />
+      <point x="114.50000000000003" y="39.0" />
+      <point x="-49.0" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.lib.uri.V5FSURL" target="org.janelia.scicomp.v5.lib.uri.V5URL" relationship="REALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.lib.vc.GitV5VersionManger" target="org.janelia.scicomp.v5.lib.vc.V5VersionManager" relationship="GENERALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="274.5" y="39.0" />
+      <point x="212.5" y="39.0" />
+      <point x="49.0" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter" target="org.janelia.scicomp.v5.lib.indexes.V5IndexWriter" relationship="REALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="152.0" y="117.0" />
+      <point x="101.25" y="117.0" />
+      <point x="48.75" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.lib.V5Writer" target="org.janelia.scicomp.v5.lib.indexes.V5IndexWriter" relationship="DEPENDENCY">
+      <point x="0.0" y="-14.0" />
+      <point x="-47.0" y="117.0" />
+      <point x="3.75" y="117.0" />
+      <point x="-48.75" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.V5FSTest" target="org.janelia.scicomp.v5.AbstractN5Test" relationship="GENERALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="org.janelia.scicomp.v5.lib.AbstractV5FSReader" target="org.janelia.scicomp.v5.lib.V5Reader" relationship="REALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="0.7225243919053458" showDependencies="false" x="683.4036079065019" y="272.0839161371571" />
+  <SelectedNodes>
+    <node>org.janelia.scicomp.v5.lib.uri.V5URL</node>
+    <node>org.janelia.scicomp.v5.lib.tools.MultiScaleZarr</node>
+    <node>org.janelia.scicomp.v5.lib.uri.V5FSURL</node>
+    <node>org.janelia.scicomp.tests.TestsWriter</node>
+    <node>org.janelia.scicomp.v5.V5FSTest</node>
+    <node>org.janelia.scicomp.v5.AbstractN5Test</node>
+    <node>org.janelia.scicomp.v5.lib.tools.SessionId</node>
+    <node>org.janelia.scicomp.v5.lib.tools.MultiscaleAttributes</node>
+    <node>org.janelia.scicomp.v5.lib.tools.Utils</node>
+  </SelectedNodes>
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

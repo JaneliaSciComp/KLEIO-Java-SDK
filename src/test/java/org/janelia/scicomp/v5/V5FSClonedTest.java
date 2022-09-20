@@ -26,53 +26,38 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc;
+package org.janelia.scicomp.v5;
 
+import org.janelia.saalfeldlab.n5.N5Writer;
+import org.janelia.scicomp.v5.fs.V5FSWriter;
+import org.janelia.scicomp.v5.lib.tools.FileUtils;
+import org.junit.Test;
+
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
-public abstract class V5VersionManager {
-    protected List<long[]> uncommittedBlocks = new ArrayList<>();
+public class V5FSClonedTest extends V5FSMasterTest {
+    static private String indexesTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/indexes";
+    static private String clonedIndexesTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/ClonedIndexes";
+    static private String rawTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/raw_data";
+    static private String username = "zouinkhim";
 
-    protected String userID;
+    /**
+     * @throws IOException
+     */
+    @Override
+    protected N5Writer createN5Writer() throws IOException {
+        //Delete if existent
+        FileUtils.forceDeleteAll(indexesTestDirPath, rawTestDirPath, clonedIndexesTestDirPath);
 
-    public String getUserID() {
-        return userID;
+        System.out.println(indexesTestDirPath);
+        V5FSWriter masterWriter = new V5FSWriter(indexesTestDirPath, rawTestDirPath);
+        checkGit(masterWriter);
+        return V5FSWriter.cloneFrom(masterWriter, clonedIndexesTestDirPath, username);
     }
 
-    public List<long[]> getUncommittedBlocks() {
-        return uncommittedBlocks;
-    }
+//    @Test
+//    protected
 
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-
-    //stage
-    public void addUncommittedBlock(long[] position) {
-        this.uncommittedBlocks.add(position);
-    }
-
-    public void resetUncommittedBlock() {
-        this.uncommittedBlocks.clear();
-    }
-
-
-    public abstract void commitAll(String message) throws IOException;
-
-    public abstract void commitBlocks() throws IOException;
-
-    public abstract void createNewBranch(String branchName) throws IOException;
-
-    public abstract void checkoutBranch(String branchName) throws IOException;
-
-    public abstract String getCurrentBranch() throws IOException;
-
-    public abstract Set<String> getUncommittedChanges() throws IOException;
-
-
-    public abstract Set<String> getUntrackedChanges() throws IOException;
 
 }

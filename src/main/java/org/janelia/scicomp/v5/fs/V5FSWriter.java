@@ -28,38 +28,39 @@
 
 package org.janelia.scicomp.v5.fs;
 
-import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.lib.tools.MultiscaleAttributes;
 import org.janelia.scicomp.v5.lib.V5Writer;
 import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
-import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
+import org.janelia.scicomp.v5.lib.tools.MultiscaleAttributes;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
+import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 
 public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter, N5FSWriter> {
-
-    public V5FSWriter(String versionIndexPath, String dataStorePath) throws IOException {
-        super(new N5ZarrIndexWriter(versionIndexPath), new N5FSWriter(dataStorePath), new V5FSURL(versionIndexPath, dataStorePath));
-    }
 
     public V5FSWriter(V5FSURL v5FSURL) throws IOException {
         this(v5FSURL.getIndexesPath(), v5FSURL.getKeyValueStorePath());
     }
 
-    public static V5FSWriter cloneFrom(String remoteIndexPath, String localIndexPath, String dataStorePath, String username) throws Exception {
+    public V5FSWriter(String versionIndexPath, String dataStorePath) throws IOException {
+        super(new N5ZarrIndexWriter(versionIndexPath), new N5FSWriter(dataStorePath), new V5FSURL(versionIndexPath, dataStorePath));
+    }
+
+    private static V5FSWriter cloneFrom(String remoteIndexPath, String dataStorePath,String localIndexPath,  String username) throws IOException {
         GitV5VersionManger versionManger = GitV5VersionManger.cloneFrom(remoteIndexPath, localIndexPath, username);
-        versionManger.createNewBranch(username);
-        return new V5FSWriter(localIndexPath, dataStorePath);
+        V5FSWriter n5 = new V5FSWriter(localIndexPath, dataStorePath);
+        n5.createNewBranch(username);
+        return n5;
     }
 
     public static V5FSWriter convert(N5FSWriter reader, String dataset, String indexPath, String dataStorePath) throws IOException {
@@ -96,11 +97,14 @@ public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter
         return writer;
     }
 
+    public static V5FSWriter cloneFrom(V5FSWriter masterWriter, String clonedIndexPath, String username) throws IOException {
+        return cloneFrom(masterWriter.getIndexWriter().getBasePath(),masterWriter.getRawWriter().getBasePath(),clonedIndexPath,username);
+    }
+
     @Override
     public N5ZarrIndexWriter getIndexWriter() {
         return (N5ZarrIndexWriter) indexReader;
     }
-
     @Override
     public N5FSWriter getRawWriter() {
         return (N5FSWriter) rawReader;

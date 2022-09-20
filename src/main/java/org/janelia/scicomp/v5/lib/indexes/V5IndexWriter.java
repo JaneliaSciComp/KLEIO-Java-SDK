@@ -48,6 +48,8 @@ public interface V5IndexWriter<G extends V5VersionManager> extends N5Writer, N5R
         setSession(SessionId.getNextId());
         return getSession();
     }
+
+    //TODO change to version
     default UnsignedLongType getCurrentSession() {
         if (getSession() == null)
             return incrementSession();
