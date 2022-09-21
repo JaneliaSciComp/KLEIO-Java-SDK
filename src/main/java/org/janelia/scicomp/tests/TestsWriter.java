@@ -93,7 +93,8 @@ public class TestsWriter {
     private static void cloneMaster() throws Exception {
 
 
-        V5FSWriter writer = V5FSWriter.cloneFrom(masterIndex, clonedIndex,dataStore, username);
+
+        V5FSWriter writer = V5FSWriter.cloneFrom(new V5FSWriter(masterIndex,dataStore), clonedIndex, username);
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s:resolutions){
             HashMap<String, JsonElement> att = writer.getAttributes(s);

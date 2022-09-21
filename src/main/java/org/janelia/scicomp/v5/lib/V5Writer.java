@@ -43,7 +43,7 @@ public interface V5Writer<I extends V5IndexWriter, K extends N5Writer> extends N
     K getRawWriter();
 
     default void commit() throws IOException {
-        getIndexWriter().getVersionManager().commitAll();
+        getIndexWriter().getVersionManager().commitBlocks();
     }
 
     default void createNewBranch(String branchName) throws IOException {

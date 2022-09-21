@@ -26,26 +26,18 @@
  *
  */
 
-package org.janelia.scicomp.v5;
+package org.janelia.scicomp.v5.lib.tools;
 
-import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.scicomp.v5.fs.V5FSWriter;
-
+import java.io.File;
 import java.io.IOException;
 
-public class V5FSTest extends AbstractN5Test {
-    static private String indexesTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/indexes";
-    static private String rawTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/raw_data";
-
-    /**
-     * @throws IOException
-     */
-    @Override
-    protected N5Writer createN5Writer() throws IOException {
-        System.out.println(indexesTestDirPath);
-
-        return new V5FSWriter(indexesTestDirPath,rawTestDirPath);
+public class FileUtils {
+    public static void forceDeleteAll(String... folders) throws IOException {
+        for(String f: folders){
+            File file = new File(f);
+            if (file.exists()){
+                org.apache.commons.io.FileUtils.forceDelete(file);
+            }
+        }
     }
-
-
 }

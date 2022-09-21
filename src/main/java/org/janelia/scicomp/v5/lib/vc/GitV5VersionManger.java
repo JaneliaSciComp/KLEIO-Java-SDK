@@ -36,6 +36,7 @@ import org.janelia.scicomp.v5.lib.tools.Utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 
 public class GitV5VersionManger extends V5VersionManager {
@@ -68,6 +69,24 @@ public class GitV5VersionManger extends V5VersionManager {
         return this.git.getRepository().getBranch();
     }
 
+    @Override
+    public Set<String> getUncommittedChanges() throws IOException {
+        try {
+            return this.git.status().call().getUncommittedChanges();
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Set<String> getUntrackedChanges() throws IOException {
+        try {
+            return this.git.status().call().getUntracked();
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static GitV5VersionManger initRepo(String path) throws IOException {
         File file = new File(path);
         if (!file.exists()) {
@@ -87,11 +106,11 @@ public class GitV5VersionManger extends V5VersionManager {
 
     public static GitV5VersionManger cloneFrom(String mountedFile, String targetDirectory, String username) throws IOException {
         System.out.println("cloning:" + mountedFile);
-        File targetPath;
+        File targetPath = new File(targetDirectory);
 //        if (new File(targetDirectory).exists())
 //            targetPath = new File(targetDirectory, FilenameUtils.getBaseName(mountedFile));
 //        else
-        targetPath = new File(targetDirectory);
+//        targetPath = new File(targetDirectory);
 
         System.out.println("Target Path: " + targetPath.getAbsolutePath());
         try {
@@ -118,7 +137,7 @@ public class GitV5VersionManger extends V5VersionManager {
             AddCommand add = git.add();
             add.addFilepattern(".");
             add.call();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
@@ -133,43 +152,52 @@ public class GitV5VersionManger extends V5VersionManager {
     }
 
     public void push() throws IOException {
-        try{
-        PushCommand pushCommand = git.push();
-        pushCommand.call();
-        }catch (Exception e){
+        try {
+            PushCommand pushCommand = git.push();
+            pushCommand.call();
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
     public void pull() throws IOException {
-        try{
-        PullCommand pullCommand = git.pull();
-        pullCommand.call();
-        }catch (Exception e){
+        try {
+            PullCommand pullCommand = git.pull();
+            pullCommand.call();
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
     private void checkout(String name, boolean create) throws IOException {
-        try{
-        git.checkout().setCreateBranch(create).setName(name).call();
-        }catch (Exception e){
+        try {
+            git.checkout().setCreateBranch(create).setName(name).call();
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public void commitAll() throws IOException {
-        String message = "init";
-        if (!uncommittedBlocks.isEmpty())
-            message = Utils.format(uncommittedBlocks);
+    public void commitAll(String message) throws IOException {
         addAll();
         commit(message);
     }
 
     @Override
+    public void commitBlocks() throws IOException {
+        String message = "";
+        if (!uncommittedBlocks.isEmpty())
+            message = Utils.format(uncommittedBlocks);
+        this.commitAll(message);
+    }
+
+    @Override
     public void createNewBranch(String branchName) throws IOException {
-        checkout(branchName, true);
+        try {
+            git.branchCreate().setName(branchName).call();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
 
     }
 

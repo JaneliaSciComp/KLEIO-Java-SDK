@@ -527,7 +527,6 @@ public abstract class AbstractN5Test {
     @Test
     public void testDeepList() {
         try {
-
             // clear container to start
             n5.remove();
 
