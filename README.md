@@ -11,7 +11,8 @@ To enable version management for nd data, a mix is created of:
 
 ![solution](img/architecture.jpg "Proposed solution")
 
-#### Example: [open test class](src/main/java/org/janelia/scicomp/tests/TestsWriter.java) 
+#### Class Diagram:
+![diagram](img/diagram.png "diagram")
 
 
 ----
