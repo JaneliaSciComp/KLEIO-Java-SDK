@@ -37,7 +37,7 @@ import org.janelia.scicomp.v5.lib.V5Writer;
 import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
 import org.janelia.scicomp.v5.lib.tools.MultiscaleAttributes;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
-import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
+import org.janelia.scicomp.v5.lib.vc.GitV5VersionManager;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -57,7 +57,7 @@ public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter
     }
 
     private static V5FSWriter cloneFrom(String remoteIndexPath, String dataStorePath,String localIndexPath,  String username) throws IOException {
-        GitV5VersionManger versionManger = GitV5VersionManger.cloneFrom(remoteIndexPath, localIndexPath, username);
+        GitV5VersionManager versionManger = GitV5VersionManager.cloneFrom(remoteIndexPath, localIndexPath, username);
         V5FSWriter n5 = new V5FSWriter(localIndexPath, dataStorePath);
         n5.createNewBranch(username);
         return n5;

@@ -37,7 +37,7 @@ import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 import org.janelia.scicomp.v5.lib.tools.FileUtils;
-import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
+import org.janelia.scicomp.v5.lib.vc.GitV5VersionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,18 +49,18 @@ import java.util.Comparator;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<GitV5VersionManger> {
+public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<GitV5VersionManager> {
     protected UnsignedLongType session;
 
     private final static int[] indexMatrixBlockSize = new int[]{64, 64, 64};
     private final static DataType indexMatrixDataType = DataType.UINT64;
     private final static Compression indexMatrixCompression = new GzipCompression();
 
-    protected final GitV5VersionManger versionManger;
+    protected final GitV5VersionManager versionManger;
 
     public N5ZarrIndexWriter(String basePath, GsonBuilder gsonBuilder, String dimensionSeparator, boolean mapN5DatasetAttributes) throws IOException {
         super(basePath, gsonBuilder, dimensionSeparator, mapN5DatasetAttributes);
-        this.versionManger = new GitV5VersionManger(basePath);
+        this.versionManger = new GitV5VersionManager(basePath);
         getVersionManager().commitAll("initial");
     }
 
@@ -85,7 +85,7 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
     }
 
     @Override
-    public GitV5VersionManger getVersionManager() {
+    public GitV5VersionManager getVersionManager() {
         return versionManger;
     }
 

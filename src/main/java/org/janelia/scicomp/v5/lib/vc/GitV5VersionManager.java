@@ -39,11 +39,11 @@ import java.io.IOException;
 import java.util.Set;
 
 
-public class GitV5VersionManger extends V5VersionManager {
+public class GitV5VersionManager extends V5VersionManager {
     private final String path;
     protected final Git git;
 
-    public GitV5VersionManger(String path) throws IOException {
+    public GitV5VersionManager(String path) throws IOException {
         this.path = path;
         this.git = openOrInit(new File(path));
     }
@@ -60,8 +60,8 @@ public class GitV5VersionManger extends V5VersionManager {
         }
     }
 
-    public static GitV5VersionManger open(String path) throws IOException {
-        return new GitV5VersionManger(path);
+    public static GitV5VersionManager open(String path) throws IOException {
+        return new GitV5VersionManager(path);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class GitV5VersionManger extends V5VersionManager {
         }
     }
 
-    public static GitV5VersionManger initRepo(String path) throws IOException {
+    public static GitV5VersionManager initRepo(String path) throws IOException {
         File file = new File(path);
         if (!file.exists()) {
             throw new IOException("Folder " + path + " doesn't exist !");
@@ -104,7 +104,7 @@ public class GitV5VersionManger extends V5VersionManager {
         return path;
     }
 
-    public static GitV5VersionManger cloneFrom(String mountedFile, String targetDirectory, String username) throws IOException {
+    public static GitV5VersionManager cloneFrom(String mountedFile, String targetDirectory, String username) throws IOException {
         System.out.println("cloning:" + mountedFile);
         File targetPath = new File(targetDirectory);
 //        if (new File(targetDirectory).exists())
@@ -122,13 +122,13 @@ public class GitV5VersionManger extends V5VersionManager {
             System.out.println("Couldn't clone :" + mountedFile);
             throw new IOException(e);
         }
-        return new GitV5VersionManger(targetPath.getAbsolutePath());
+        return new GitV5VersionManager(targetPath.getAbsolutePath());
     }
 
     public static void main(String[] args) throws IOException {
         String mountedDirectory = "/groups/scicompsoft/home/zouinkhim/test_versioned";
         String username = "zouinkhim";
-        GitV5VersionManger versionControlledDirectory = GitV5VersionManger.cloneFrom(mountedDirectory, new File("").getAbsolutePath(), username);
+        GitV5VersionManager versionControlledDirectory = GitV5VersionManager.cloneFrom(mountedDirectory, new File("").getAbsolutePath(), username);
         System.out.println(versionControlledDirectory.getPath());
     }
 
