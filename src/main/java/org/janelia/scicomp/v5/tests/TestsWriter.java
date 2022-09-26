@@ -26,7 +26,7 @@
  *
  */
 
-package org.janelia.scicomp.tests;
+package org.janelia.scicomp.v5.tests;
 
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;

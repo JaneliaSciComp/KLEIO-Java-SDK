@@ -26,34 +26,44 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib;
+package org.janelia.scicomp.v5;
 
+import com.google.gson.JsonElement;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.DataBlock;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
+import org.janelia.scicomp.v5.lib.V5Reader;
 import org.janelia.scicomp.v5.lib.uri.V5URL;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
-public abstract class AbstractV5FSReader<I extends N5Reader, K extends N5Reader> implements V5Reader<I,K> {
+public class AbstractV5Reader<I extends N5Reader, K extends N5Reader> implements V5Reader<I, K> {
 
-    protected final I indexReader;
-    protected final K rawReader;
+    protected final I indexes;
+    protected final K raw;
     protected final V5URL url;
 
-    public AbstractV5FSReader(I indexReader, K rawReader, V5URL url) {
-        this.indexReader = indexReader;
-        this.rawReader = rawReader;
+    public AbstractV5Reader(I indexReader, K rawReader, V5URL url) throws IOException {
+        this.indexes = indexReader;
+        this.raw = rawReader;
         this.url = url;
+        if (this.exists("/")) {
+            Version version = this.getVersion();
+            if (!VERSION.isCompatible(version)) {
+                throw new IOException("Incompatible version " + version + " (this is " + VERSION + ").");
+            }
+        }
     }
 
     @Override
     public K getRawReader() {
-        return rawReader;
+        return raw;
     }
 
     @Override
@@ -63,7 +73,7 @@ public abstract class AbstractV5FSReader<I extends N5Reader, K extends N5Reader>
 
     @Override
     public I getIndexReader() {
-        return indexReader;
+        return indexes;
     }
 
     @Override
@@ -73,17 +83,30 @@ public abstract class AbstractV5FSReader<I extends N5Reader, K extends N5Reader>
 
     protected long getBlockVersion(String dataset, long[] gridPosition) throws IOException {
         //TODO what's the most optimal way to read the cell and keep it in cache
-        return  ((UnsignedLongType) N5Utils.openVolatile(getIndexReader(),dataset).getAt(gridPosition)).get();
+        return ((UnsignedLongType) N5Utils.openVolatile(getIndexReader(), dataset).getAt(gridPosition)).get();
+    }
+
+    @Override
+    public <T> T getAttribute(String pathName, String key, Class<T> clazz) throws IOException {
+        return getRawReader().getAttribute(pathName, key, clazz);
+    }
+
+    @Override
+    public <T> T getAttribute(String pathName, String key, Type type) throws IOException {
+        return getRawReader().getAttribute(pathName, key, type);
+    }
+
+    @Override
+    public DatasetAttributes getDatasetAttributes(String pathName) throws IOException {
+        return getRawReader().getDatasetAttributes(pathName);
     }
 
     @Override
     public DataBlock<?> readBlock(String pathName, DatasetAttributes datasetAttributes, long... gridPosition) throws IOException {
         long version = getBlockVersion(pathName, gridPosition);
-        if(version==0) {
+        if (version == 0)
             return null;
-        }
         Path versionedPath = Paths.get(pathName, String.valueOf(version));
-
-        return rawReader.readBlock(versionedPath.toString(),datasetAttributes,gridPosition);
+        return getRawReader().readBlock(versionedPath.toString(), datasetAttributes, gridPosition);
     }
 }
