@@ -35,7 +35,6 @@ import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrReader;
 import org.janelia.scicomp.v5.AbstractV5Reader;
-import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 
 import java.io.IOException;
@@ -52,7 +51,7 @@ import java.util.HashMap;
 //TODO add overwrite annotation
 public class V5FSReader extends AbstractV5Reader<N5ZarrReader, N5FSReader> {
     public V5FSReader(String versionIndexPath, String dataStorePath) throws IOException {
-        this(new N5ZarrIndexWriter(versionIndexPath), new N5FSReader(dataStorePath), new V5FSURL(versionIndexPath, dataStorePath));
+        this(new N5ZarrReader(versionIndexPath), new N5FSReader(dataStorePath), new V5FSURL(versionIndexPath, dataStorePath));
     }
 
     protected V5FSReader(N5ZarrReader indexStore, N5FSReader rawStore, V5FSURL url) throws IOException {
