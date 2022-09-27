@@ -28,27 +28,25 @@
 
 package org.janelia.scicomp.v5.fs;
 
-import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.img.cell.CellGrid;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.janelia.saalfeldlab.n5.DataBlock;
-import org.janelia.saalfeldlab.n5.DatasetAttributes;
-import org.janelia.saalfeldlab.n5.N5FSWriter;
+import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.AbstractV5Writer;
+import org.janelia.scicomp.v5.lib.V5Writer;
 import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
 import org.janelia.scicomp.v5.lib.tools.MultiscaleAttributes;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 
-public class V5FSWriter extends AbstractV5Writer<N5ZarrIndexWriter, N5FSWriter> {
+public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter, N5FSWriter> {
 
     public V5FSWriter(V5FSURL v5FSURL) throws IOException {
         this(v5FSURL.getIndexesPath(), v5FSURL.getKeyValueStorePath());
@@ -103,8 +101,51 @@ public class V5FSWriter extends AbstractV5Writer<N5ZarrIndexWriter, N5FSWriter> 
         return cloneFrom(masterWriter.getIndexWriter().getBasePath(),masterWriter.getRawWriter().getBasePath(),clonedIndexPath,username);
     }
 
-    public HashMap<String, JsonElement> getAttributes(String pathName) throws IOException {
-        return getRawReader().getAttributes(pathName);
+    @Override
+    public N5ZarrIndexWriter getIndexWriter() {
+        return (N5ZarrIndexWriter) indexes;
+    }
+    @Override
+    public N5FSWriter getRawWriter() {
+        return (N5FSWriter) raw;
+    }
+
+
+    @Override
+    public void createDataset(String pathName, DatasetAttributes datasetAttributes) throws IOException {
+        CellGrid grid = new CellGrid(datasetAttributes.getDimensions(), datasetAttributes.getBlockSize());
+        getIndexWriter().createDataset(pathName, grid.getGridDimensions());
+        getRawWriter().createDataset(pathName, datasetAttributes);
+    }
+
+    @Override
+    public void createDataset(String pathName, long[] dimensions, int[] blockSize, DataType dataType, Compression compression) throws IOException {
+        CellGrid grid = new CellGrid(dimensions, blockSize);
+        getIndexWriter().createDataset(pathName, grid.getGridDimensions());
+        getRawWriter().createDataset(pathName, dimensions, blockSize, dataType, compression);
+    }
+
+    @Override
+    public <T> void writeBlock(String pathName, DatasetAttributes datasetAttributes, DataBlock<T> dataBlock) throws IOException {
+        long version = getIndexWriter().getCurrentSession().get();
+        Path path = Paths.get(pathName, String.valueOf(version));
+        getRawWriter().writeBlock(path.toString(), datasetAttributes, dataBlock);
+        getIndexWriter().set(pathName, dataBlock.getGridPosition());
+    }
+
+    @Override
+    public boolean deleteBlock(String pathName, long... gridPosition) throws IOException {
+
+        boolean rawRemoved = getRawWriter().deleteBlock(pathName, gridPosition);
+        getIndexWriter().set(pathName, gridPosition, new UnsignedLongType(0));
+        if (rawRemoved)
+            return true;
+        return false;
+    }
+
+    @Override
+    public boolean exists(String pathName) {
+        return super.exists(pathName);
     }
 
     public static void main(String[] args) throws Exception {
