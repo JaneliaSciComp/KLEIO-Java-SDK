@@ -65,6 +65,11 @@ public class V5FSURL implements V5URL {
         }
     }
 
+    @Override
+    public String toString() {
+        return getURL();
+    }
+
     public String getIndexesPath() {
         return indexesPath;
     }

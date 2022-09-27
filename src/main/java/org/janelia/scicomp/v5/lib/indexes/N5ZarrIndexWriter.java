@@ -104,18 +104,18 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
 
         CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(this, dataset);
         UnsignedLongType p = img.getAt(gridPosition);
+        if (p.equals(value))
+            return;
         p.set(value);
-//        DatasetAttributes attrs = this.getDatasetAttributes(dataset);
-        try {
-            N5Utils.saveRegion(Views.interval(img, new FinalInterval(gridPosition, new long[]{1, 1, 1})), this, dataset);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+
+        DatasetAttributes attrs = this.getDatasetAttributes(dataset);
+        N5Utils.save(img, this, dataset, attrs.getBlockSize(), attrs.getCompression());
+            //TODO: check - Removed because of bug in Paintera commit test UnsupportedOperationException (IntervalChunks.java:115)
+//            N5Utils.saveRegion(Views.interval(img, new FinalInterval(gridPosition, new long[]{1, 1, 1})), this, dataset);
+
         getVersionManager().addUncommittedBlock(gridPosition);
 
-//        N5Utils.save(img, this, dataset, attrs.getBlockSize(), attrs.getCompression());
+//
     }
 
 
