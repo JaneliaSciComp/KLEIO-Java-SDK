@@ -35,6 +35,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.fail;
@@ -42,6 +43,7 @@ import static org.junit.Assert.fail;
 public class V5FSMasterTest extends AbstractN5Test {
     static private String indexesTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/indexes";
     static private String rawTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/raw_data";
+    static private String n5fsTestDirPath = System.getProperty("user.home") + "/tmp/n5-test/n5";
 
     /**
      * @throws IOException
@@ -158,6 +160,48 @@ public class V5FSMasterTest extends AbstractN5Test {
                 }
             }
         }
+    }
+
+    @Test
+    public void testListAttributesSameAsFS() {
+
+        final String groupName2 = groupName + "-2";
+        final String datasetName2 = datasetName + "-2";
+        try {
+            N5Writer n5fs = new N5FSWriter(n5fsTestDirPath);
+
+            n5fs.createDataset(datasetName2, dimensions, blockSize, DataType.UINT64, new RawCompression());
+            n5.createDataset(datasetName2, dimensions, blockSize, DataType.UINT64, new RawCompression());
+
+            Map<String, Class<?>> n5AttributesMap = setAttributes(n5fs,datasetName2);
+            Map<String, Class<?>> v5AttributesMap =  setAttributes(n5,datasetName2);
+
+            Assert.assertEquals(v5AttributesMap,n5AttributesMap);
+
+            n5fs.createGroup(groupName2);
+            n5AttributesMap =  setAttributes(n5fs,groupName2);
+
+            n5.createGroup(groupName2);
+            v5AttributesMap =  setAttributes(n5,groupName2);
+
+            Assert.assertEquals(v5AttributesMap,n5AttributesMap);
+            n5fs.remove();
+
+        } catch (final IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private Map<String, Class<?>> setAttributes(N5Writer n5, String datasetName) throws IOException {
+        n5.setAttribute(datasetName, "attr1", new double[] {1.1, 2.1, 3.1});
+        n5.setAttribute(datasetName, "attr2", new String[] {"a", "b", "c"});
+        n5.setAttribute(datasetName, "attr3", 1.1);
+        n5.setAttribute(datasetName, "attr4", "a");
+        n5.setAttribute(datasetName, "attr5", new long[] {1, 2, 3});
+        n5.setAttribute(datasetName, "attr6", 1);
+        n5.setAttribute(datasetName, "attr7", new double[] {1, 2, 3.1});
+        n5.setAttribute(datasetName, "attr8", new Object[] {"1", 2, 3.1});
+        return n5.listAttributes(datasetName);
     }
 
     @Override
