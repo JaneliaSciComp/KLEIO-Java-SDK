@@ -28,7 +28,6 @@
 
 package org.janelia.scicomp.v5;
 
-import com.google.gson.JsonElement;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.DataBlock;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
@@ -41,7 +40,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 
 public class AbstractV5Reader<I extends N5Reader, K extends N5Reader> implements V5Reader<I, K> {
 
