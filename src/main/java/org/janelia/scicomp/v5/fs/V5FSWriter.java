@@ -63,8 +63,7 @@ public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter
         return n5;
     }
 
-    public static V5FSWriter convert(N5FSWriter reader, String dataset, String indexPath, String dataStorePath) throws IOException {
-        V5FSWriter writer = new V5FSWriter(indexPath, dataStorePath);
+    public static V5FSWriter convert(N5FSReader reader, String dataset, V5FSWriter writer) throws IOException {
 //        create n5 dataset
         List<MultiscaleAttributes> atts = MultiscaleAttributes.generateFromN5(reader, dataset);
         String outputDataset;
@@ -154,7 +153,7 @@ public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter
         String indexes = "/Users/zouinkhim/Desktop/active_learning/versioned_data/fsdata/indexes";
         String dataStore = "/Users/zouinkhim/Desktop/active_learning/versioned_data/fsdata/dataStore";
         N5FSWriter reader = new N5FSWriter(n5_read);
-        V5FSWriter writer = V5FSWriter.convert(reader, dataset, indexes, dataStore);
+        V5FSWriter writer = V5FSWriter.convert(reader, dataset, new V5FSWriter(indexes, dataStore));
         System.out.println(writer.getCurrentBranch());
         writer.getIndexWriter().getVersionManager().setUserID("zouinkhim");
         writer.commit();
