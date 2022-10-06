@@ -76,10 +76,13 @@ public class MultiscaleAttributes {
                 N5Importer.GROUP_PARSERS,
                 N5Importer.PARSERS);
 
+    //TODO fix doesn't discover if main path is dataset
         N5TreeNode root = parsers.discoverRecursive(n5, dataset);
+//        if(root.isDataset())
+//            result.add(new MultiscaleAttributes(dataset,t.getMetadata().getAttributes().getDimensions(), t.getMetadata().getAttributes().getBlockSize()))
 
         for (N5TreeNode t : root.childrenList()) {
-            result.add(new MultiscaleAttributes(t.getPath().replace(dataset, ""), t.getMetadata().getAttributes().getDimensions(), t.getMetadata().getAttributes().getBlockSize()));
+            result.add(new MultiscaleAttributes(t.getPath(), t.getMetadata().getAttributes().getDimensions(), t.getMetadata().getAttributes().getBlockSize()));
         }
         return result;
     }

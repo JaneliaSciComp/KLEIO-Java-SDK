@@ -35,8 +35,8 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "show all branches", mixinStandardHelpOptions = true, version = "1.0",
-        description = "Show all branches in BigDataViewer")
+@CommandLine.Command(name = "N5 to V5 Converter", mixinStandardHelpOptions = true, version = "1.0",
+        description = "Convert N5 dataset to V5")
 class ConvertN5ToV5_Plugin implements Callable<Integer> {
     @CommandLine.Option(names = {"-i", "--input"}, required = true,description = "Input n5 path")
     private String input_path;
@@ -50,11 +50,6 @@ class ConvertN5ToV5_Plugin implements Callable<Integer> {
     @CommandLine.Option(names = {"-ok", "--output_kv"}, required = true, description = "Output V5 raw Key-Value Path")
     private String output_kv;
 
-    @CommandLine.Option(names = {"-d", "--dataset"}, required = true, description = "Dataset")
-    private String dataset;
-
-
-
 
     @Override
     public Integer call() throws Exception {
@@ -66,11 +61,12 @@ class ConvertN5ToV5_Plugin implements Callable<Integer> {
     }
 
     public static void main(String[] args) throws IOException {
-//        String path = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/test_data.n5";
-//        String indexes = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes";
-//        String dataStore = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store";
-//        String dataset = "volumes/crop129/labels/all";
-        int exitCode = new CommandLine(new ConvertN5ToV5_Plugin()).execute(args);
+        String path = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/test_data.n5";
+        String indexes = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes";
+        String dataStore = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store";
+        String dataset = "/volumes/crop129/labels/";
+        String[] arg = ("-i " + path + " -id " + dataset + " -oi " + indexes + " -ok " + dataStore).split(" ");
+        int exitCode = new CommandLine(new ConvertN5ToV5_Plugin()).execute(arg);
         System.exit(exitCode);
     }
 }

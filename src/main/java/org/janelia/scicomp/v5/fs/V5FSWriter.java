@@ -30,6 +30,7 @@ package org.janelia.scicomp.v5.fs;
 
 import net.imglib2.cache.img.CachedCellImg;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.integer.UnsignedLongType;
 import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
@@ -63,18 +64,15 @@ public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter
         return n5;
     }
 
-    public static V5FSWriter convert(N5FSReader reader, String dataset, V5FSWriter writer) throws IOException {
-//        create n5 dataset
-        List<MultiscaleAttributes> atts = MultiscaleAttributes.generateFromN5(reader, dataset);
-        String outputDataset;
+    public static<T extends NativeType<T>> V5FSWriter convert(N5FSReader reader, String InputDataset, V5FSWriter writer) throws IOException {
+        List<MultiscaleAttributes> atts = MultiscaleAttributes.generateFromN5(reader, InputDataset);
         for (MultiscaleAttributes attributes : atts) {
-            outputDataset = attributes.getDataset();
-            String inputDataset = Paths.get(dataset, outputDataset).toString();
-            System.out.println("Creating : " + outputDataset);
-            DatasetAttributes datasetAttributes = reader.getDatasetAttributes(inputDataset);
-            writer.createDataset(outputDataset, datasetAttributes);
+            String currentDataset = attributes.getDataset();
+            System.out.println("Creating : " + currentDataset);
+            DatasetAttributes datasetAttributes = reader.getDatasetAttributes(currentDataset);
+            writer.createDataset(currentDataset, datasetAttributes);
             //Write blocks
-            CachedCellImg<UnsignedLongType, ?> canvas = N5Utils.open(reader, inputDataset);
+            CachedCellImg<T, ?> canvas = N5Utils.open(reader, currentDataset);
             long[] gridDimensions = canvas.getCellGrid().getGridDimensions();
             System.out.println("Blocks: " + Arrays.toString(gridDimensions));
             if (gridDimensions.length != 3) {
@@ -86,8 +84,8 @@ public class V5FSWriter extends V5FSReader implements V5Writer<N5ZarrIndexWriter
 
                         long[] gridPosition = new long[]{i, j, k};
                         System.out.println("Writing: " + Arrays.toString(gridPosition));
-                        DataBlock<?> block = reader.readBlock(inputDataset, datasetAttributes, gridPosition);
-                        writer.writeBlock(outputDataset, datasetAttributes, block);
+                        DataBlock<?> block = reader.readBlock(currentDataset, datasetAttributes, gridPosition);
+                        writer.writeBlock(currentDataset, datasetAttributes, block);
                     }
                 }
             }
