@@ -67,25 +67,24 @@ public class MultiVersionZarrReader extends N5ZarrReader {
         String path = Paths.get(removeLeadingSlash(pathName), ".zarray").toFile().getPath();
         HashMap<String, JsonElement> attributes = new HashMap();
         if (repo.exists(path)) {
-            N5FSReader.LockedFileChannel lockedFileChannel = LockedFileChannel.openForReading(Paths.get(path));
             Throwable var5 = null;
-
+            InputStream in = null;
             try {
-                InputStream in = this.readGitObject(path);
+                in = this.readGitObject(path);
                 attributes.putAll(GsonAttributesParser.readAttributes(new InputStreamReader(in), this.gson));
             } catch (Throwable var14) {
                 var5 = var14;
                 throw var14;
             } finally {
-                if (lockedFileChannel != null) {
+                if (in != null) {
                     if (var5 != null) {
                         try {
-                            lockedFileChannel.close();
+                            in.close();
                         } catch (Throwable var13) {
                             var5.addSuppressed(var13);
                         }
                     } else {
-                        lockedFileChannel.close();
+                        in.close();
                     }
                 }
 
@@ -119,27 +118,26 @@ public class MultiVersionZarrReader extends N5ZarrReader {
         if (!repo.exists(path)) {
             return null;
         } else {
-            N5FSReader.LockedFileChannel lockedChannel = LockedFileChannel.openForReading(Paths.get(path));
             Throwable var9 = null;
-
+            InputStream in = null;
             DataBlock var10;
             try {
-                InputStream in = this.readGitObject(path);
+                in = this.readGitObject(path);
                 new InputStreamReader(in);
                 var10 = readBlock(in, zarrDatasetAttributes, gridPosition);
             } catch (Throwable var19) {
                 var9 = var19;
                 throw var19;
             } finally {
-                if (lockedChannel != null) {
+                if (in != null) {
                     if (var9 != null) {
                         try {
-                            lockedChannel.close();
+                            in.close();
                         } catch (Throwable var18) {
                             var9.addSuppressed(var18);
                         }
                     } else {
-                        lockedChannel.close();
+                        in.close();
                     }
                 }
 
