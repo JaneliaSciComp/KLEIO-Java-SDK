@@ -29,12 +29,16 @@
 package org.janelia.scicomp.v5.lib.vc.merge;
 
 import com.google.common.collect.Lists;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.janelia.saalfeldlab.n5.DataType;
 import org.janelia.saalfeldlab.n5.N5FSWriter;
 import org.janelia.saalfeldlab.n5.RawCompression;
+import org.janelia.saalfeldlab.n5.s3.N5AmazonS3Reader;
 import org.janelia.scicomp.v5.lib.tools.FileUtils;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
@@ -62,7 +66,7 @@ public class GitMergeConflictTest {
         manager.createNewBranch("test");
         manager.checkoutBranch("test");
 
-        writer.createDataset("hello", new long[]{10,10,10},new int[]{2,2,2}, DataType.UINT64,new RawCompression());
+        writer.createDataset("hello", new long[]{10, 10, 10}, new int[]{2, 2, 2}, DataType.UINT64, new RawCompression());
 
 
         Set<String> uncommitted = manager.getGit().status().call().getUncommittedChanges();
@@ -74,31 +78,44 @@ public class GitMergeConflictTest {
         System.out.println(manager.getCurrentBranch());
 
         manager.checkoutBranch(masterBranch);
-        writer.createDataset("hello", new long[]{110,10,10},new int[]{22,2,2}, DataType.UINT8,new RawCompression());
-
-        manager.commitAll("n5_hello");
-
-        MergeResult result = manager.getGit().merge().include(manager.getGit().getRepository().findRef("test")).call();
-
-        System.out.println("conflicts:");
-        Map<String, int[][]> conflicts = result.getConflicts();
-        for (String k :
-                conflicts.keySet()) {
-            System.out.println(k+":"+conflicts.get(k));
-        }
-        System.out.println("merged !");
-
-//        Iterable<RevCommit> commits = manager.getGit().log().call();
+////        writer.createDataset("hello", new long[]{110,10,10},new int[]{22,2,2}, DataType.UINT8,new RawCompression());
 //
-//        List<RevCommit> commitsList = Lists.newArrayList(commits.iterator());
+////        manager.commitAll("n5_hello");
+////.setSquash() all in one commit
+        MergeResult result = manager.getGit().merge().setCommit(false).setFastForward(MergeCommand.FastForwardMode.NO_FF).include(manager.getGit().getRepository().findRef("test")).call();
 //
-//        for (RevCommit commit : commitsList) {
-//            System.out.println("commit:");
-//            System.out.println(commit.getName());
-//            System.out.println(commit.getAuthorIdent().getName());
-//            System.out.println(new Date(commit.getCommitTime() * 1000L));
-//            System.out.println(commit.getFullMessage());
+//        System.out.println("conflicts:");
+//        Map<String, int[][]> conflicts = result.getConflicts();
+//        if (conflicts == null) {
+//            System.out.println("NO conflict");
+//        } else {
+//            for (String k :
+//                    conflicts.keySet()) {
+//                System.out.println(k + ":" + conflicts.get(k));
+//            }
 //        }
+//        System.out.println("merged !");
+//
+//        showCommits(manager.getGit());
+////reset change
+//        manager.getGit().reset().setMode(ResetCommand.ResetType.HARD).call();
+
+//        showCommits(manager.getGit());
+    }
+
+    private static void showCommits(Git git) throws GitAPIException {
+        Iterable<RevCommit> commits = git.log().call();
+
+        List<RevCommit> commitsList = Lists.newArrayList(commits.iterator());
+
+        System.out.println("--------------------------");
+        for (RevCommit commit : commitsList) {
+            System.out.println("commit:");
+            System.out.println(commit.getName());
+            System.out.println(commit.getAuthorIdent().getName());
+            System.out.println(new Date(commit.getCommitTime() * 1000L));
+            System.out.println(commit.getFullMessage());
+        }
     }
 }
 

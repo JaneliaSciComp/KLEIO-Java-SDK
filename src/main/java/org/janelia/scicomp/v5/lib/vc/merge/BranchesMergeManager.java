@@ -33,6 +33,7 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
+import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
 import java.io.IOException;
@@ -40,6 +41,10 @@ import java.util.Map;
 
 public class BranchesMergeManager {
     private final GitV5VersionManger manager;
+
+    public BranchesMergeManager(String indexMatrix) throws IOException {
+        this.manager = new N5ZarrIndexWriter(indexMatrix).getVersionManager();
+    }
 
     public BranchesMergeManager(V5FSWriter writer) {
         this.manager = writer.getIndexWriter().getVersionManager();

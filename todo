@@ -1,0 +1,44 @@
+todo:
+1- annotation using Paintera:
+	record tutorial
+
+2- get data modify and give back
+	make tutorial
+
+3- example show remote data github + s3
+	1- create data
+	2- upload data
+	3- test
+	4- create tutorial
+
+4- show same block in bigdataviewer in different blocks
+	1- create data
+	2- test
+	3- create tutorial
+
+5- Merge
+	1- Create data
+	2- check merge
+	3- merge
+	4- create tutorial
+
+6- create terminal install
+
+
+unit test Paintera and working
+
+remote:
+JGit lower level
+Github in memory stream reader
+remote reader for V5: Github + S3
+Show in BDV
+
+Merge in Java SDK:
+
+BDV show all branches without checkout
+Merge, get conflict
+
+doing:
+show conflict in BDV
+Annotation: create use cases
+Tutorial how to extend the SDK to other data formats
