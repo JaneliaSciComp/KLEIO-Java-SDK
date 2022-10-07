@@ -37,9 +37,9 @@ import picocli.CommandLine.Option;
 
 import java.util.concurrent.Callable;
 
-@Command(name = "show all branches", mixinStandardHelpOptions = true, version = "1.0",
+@Command(name = "BigDataViewer show all branches", mixinStandardHelpOptions = true, version = "1.0",
         description = "Show all branches in BigDataViewer")
-class ShowAllBranches_Plugin implements Callable<Integer> {
+class BDVShowAllBranches_Plugin implements Callable<Integer> {
 
     @Option(names = {"-i", "--index_path"}, required = true, description = "Index Matrix Path")
     private String indexPath;
@@ -68,6 +68,7 @@ class ShowAllBranches_Plugin implements Callable<Integer> {
     }
 
     public static void main(String... args) {
-        new CommandLine(new ShowAllBranches_Plugin()).execute(args);
+//        args = "-help".split(" ");
+        new CommandLine(new BDVShowAllBranches_Plugin()).execute(args);
     }
 }

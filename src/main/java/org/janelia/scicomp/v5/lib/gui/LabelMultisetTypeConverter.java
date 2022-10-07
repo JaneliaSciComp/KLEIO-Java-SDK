@@ -37,39 +37,73 @@ import net.imglib2.type.label.Label;
 import net.imglib2.type.label.LabelMultisetType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.view.Views;
+import org.janelia.saalfeldlab.n5.N5Reader;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class LabelMultisetTypeConverter implements Converter<LabelMultisetType, UnsignedShortType> {
-
+    public static final String IS_LABEL_MULTISET_KEY = "isLabelMultiset";
     private final Label entry;
+    private final boolean isOneValue;
+    private final List<Label> entries;
 
     public LabelMultisetTypeConverter(LabelMultisetType entry) {
+        if (entry.entrySet().isEmpty())
+            throw new RuntimeException("ERROR Empty LabelMultisetType !");
+        if (entry.entrySet().size() == 1) {
+            this.entry = entry.entrySet().iterator().next().getElement();
+            this.isOneValue = true;
+            this.entries = null;
+        } else {
+            this.entry = null;
+            this.entries = getListed(entry);
+            this.isOneValue = false;
+        }
+    }
 
-        if (entry.entrySet().size() != 1) throw new RuntimeException("Works only for one label !");
-
-        this.entry  = entry.entrySet().iterator().next().getElement();
+    private List<Label> getListed(LabelMultisetType entrySet) {
+        List<Label> result = new ArrayList<>();
+        Iterator<LabelMultisetType.Entry<Label>> iterator = entrySet.entrySet().iterator();
+        while (iterator.hasNext()) {
+            result.add(iterator.next().getElement());
+        }
+        return result;
     }
 
 
     @Override
     public void convert(LabelMultisetType input, UnsignedShortType output) {
-        if (!input.contains(entry)) output.set(1);
-        else output.set(0);
+        if (isOneValue) {
+            if (!input.contains(entry)) {
+                output.set(1);
+                return;
+            }
+        } else {
+            for (Label e : entries)
+                if (input.contains(e)) {
+                    output.set(entries.indexOf(e) + 1);
+                    return;
+                }
+        }
+        output.set(0);
     }
 
     public static final RandomAccessibleInterval<UnsignedShortType> convertVirtual(final RandomAccessibleInterval<LabelMultisetType> img) {
         LabelMultisetType entry = getLabelEntry(img);
-        return new ConvertedRandomAccessibleInterval<LabelMultisetType, UnsignedShortType>(img, new LabelMultisetTypeConverter(entry), new UnsignedShortType());
+        return new ConvertedRandomAccessibleInterval<>(img, new LabelMultisetTypeConverter(entry), new UnsignedShortType());
     }
 
     private static final LabelMultisetType getLabelEntry(RandomAccessibleInterval<LabelMultisetType> img) {
-
         Cursor<LabelMultisetType> cursor = Views.iterable(img).localizingCursor();
-
         cursor.fwd();
         return cursor.get();
     }
 
+    public static boolean isLabelMultisetType(final N5Reader n5, final String group) throws IOException {
+        return Optional.ofNullable(n5.getAttribute(group, IS_LABEL_MULTISET_KEY, Boolean.class)).orElse(false);
+    }
 }

@@ -61,12 +61,13 @@ class ConvertN5ToV5_Plugin implements Callable<Integer> {
     }
 
     public static void main(String[] args) throws IOException {
-        String path = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/test_data.n5";
-        String indexes = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes";
-        String dataStore = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store";
-        String dataset = "/volumes/crop129/labels/";
-        String[] arg = ("-i " + path + " -id " + dataset + " -oi " + indexes + " -ok " + dataStore).split(" ");
-        int exitCode = new CommandLine(new ConvertN5ToV5_Plugin()).execute(arg);
+//        String path = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/test_data.n5";
+//        String indexes = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes";
+//        String dataStore = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store";
+//        String dataset = "/volumes/crop129/labels/";
+//        String[] arg = ("-i " + path + " -id " + dataset + " -oi " + indexes + " -ok " + dataStore).split(" ");
+//        args = "-help".split(" ");
+        int exitCode = new CommandLine(new ConvertN5ToV5_Plugin()).execute(args);
         System.exit(exitCode);
     }
 }

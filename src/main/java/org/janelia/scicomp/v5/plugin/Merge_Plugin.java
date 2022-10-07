@@ -32,7 +32,6 @@ import org.janelia.scicomp.v5.lib.vc.merge.BranchesMergeManager;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
 import java.io.File;
 import java.util.concurrent.Callable;
@@ -41,7 +40,7 @@ import java.util.concurrent.Callable;
         description = "Merge branches tool, use CheckMergeConflict before ")
 class Merge_Plugin implements Callable<Integer> {
 
-    @Parameters(index = "0", description = "Index matrix Path")
+    @Option(names = {"-f", "--file"}, required = true, description = "Index matrix Path")
     private File file;
 
     @Option(names = {"-s", "--source_branch"}, description = "Source branch to merge")
@@ -62,6 +61,7 @@ class Merge_Plugin implements Callable<Integer> {
     }
 
     public static void main(String... args) {
+//        args = "-help".split(" ");
         int exitCode = new CommandLine(new Merge_Plugin()).execute(args);
         System.exit(exitCode);
     }

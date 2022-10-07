@@ -42,13 +42,13 @@ import java.util.concurrent.Callable;
         description = "Check if merge is possible or potential conflict")
 class CheckMergeConflict_Plugin implements Callable<Integer> {
 
-    @Parameters(index = "0", description = "Index matrix Path")
+    @Option(names = {"-f", "--file"}, required = true, description = "Index matrix Path")
     private File file;
 
-    @Option(names = {"-s", "--source_branch"}, description = "Source branch to merge")
+    @Option(names = {"-s", "--source_branch"}, required = true, description = "Source branch to merge")
     private String sourceBranch;
 
-    @Option(names = {"-t", "--target_branch"}, description = "Target branch to merge")
+    @Option(names = {"-t", "--target_branch"}, required = true, description = "Target branch to merge")
     private String targetBranch;
 
     @Override
@@ -69,6 +69,7 @@ class CheckMergeConflict_Plugin implements Callable<Integer> {
     }
 
     public static void main(String... args) {
+//        args = "-help".split(" ");
         int exitCode = new CommandLine(new CheckMergeConflict_Plugin()).execute(args);
         System.exit(exitCode);
     }

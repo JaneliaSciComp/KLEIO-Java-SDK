@@ -32,8 +32,6 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.cache.img.CachedCellImg;
-import net.imglib2.type.label.LabelMultisetType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
@@ -54,7 +52,7 @@ import java.io.IOException;
 public class BigDataVersionsViewer {
 
     private final V5FSReader reader;
-    private Bdv bdv = null;
+        private Bdv bdv = null;
     private final BdvOptions options;
 
     public BigDataVersionsViewer(V5FSReader reader) {
@@ -62,12 +60,23 @@ public class BigDataVersionsViewer {
         this.options = BdvOptions.options();
     }
 
-    public void showRaw(N5Reader n5, String dataset) throws IOException {
-        RandomAccessibleInterval<UnsignedShortType> img = N5Utils.openVolatile(n5, dataset);
+
+    private void showSource(N5Reader n5, String name, String dataset) throws IOException {
+        System.out.println("Showing: " + name);
+        RandomAccessibleInterval<UnsignedShortType> img;
+        if (LabelMultisetTypeConverter.isLabelMultisetType(n5, dataset)) {
+            img = LabelMultisetTypeConverter.convertVirtual(N5Utils.openVolatile(n5, dataset));
+        } else {
+            img = N5Utils.openVolatile(n5, dataset);
+        }
         if (bdv == null)
-            bdv = BdvFunctions.show(img, dataset, options);
+            bdv = BdvFunctions.show(img, name, options);
         else
-            BdvFunctions.show(img, dataset, options.addTo(bdv));
+            BdvFunctions.show(img, name, options.addTo(bdv));
+    }
+
+    public void showRaw(N5Reader n5, String dataset) throws IOException {
+        showSource(n5, dataset, dataset);
     }
 
 
@@ -78,27 +87,25 @@ public class BigDataVersionsViewer {
 
         GitUtils repo = new GitUtils(new File(indexPath));
 
-
         for (Ref branch : repo.getBranches()) {
             String branchName = branch.getName().replace("refs/", "");
-            System.out.println("Branch: " + branchName);
+
             RevCommit commit = repo.getLastCommitForBranch(branch);
 
             AbstractV5Reader<MultiVersionZarrReader, N5FSReader> n5 = new AbstractV5Reader<>(new MultiVersionZarrReader(indexPath, commit), rawReader, url);
-            RandomAccessibleInterval<UnsignedShortType> img = LabelMultisetTypeConverter.convertVirtual((CachedCellImg<LabelMultisetType, ?>) N5Utils.openVolatile(n5, dataset));
-
-            if (bdv == null)
-                bdv = BdvFunctions.show(img, branchName, options);
-            else
-                BdvFunctions.show(img, branchName, options.addTo(bdv));
+            showSource(n5, branchName, dataset);
         }
     }
 
     public static void main(String[] args) throws IOException, GitAPIException {
-        V5FSURL url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/datastore\"}");
-        V5FSReader v5 = new V5FSReader(url);
-        System.out.println(v5.getIndexReader().getBasePath());
-        System.out.println(v5.getRawReader().getBasePath());
-        new BigDataVersionsViewer(v5).show("annotation/data/s0");
+        V5FSURL url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store\"}");
+        V5FSReader raw = new V5FSReader(url);
+        V5FSURL branches_url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/datastore\"}");
+        V5FSReader branches = new V5FSReader(branches_url);
+        BigDataVersionsViewer bdv = new BigDataVersionsViewer(branches);
+        bdv.showRaw(raw,"/volumes/crop129/labels/all");
+        bdv.show("annotation/data/s0");
     }
+
+
 }
