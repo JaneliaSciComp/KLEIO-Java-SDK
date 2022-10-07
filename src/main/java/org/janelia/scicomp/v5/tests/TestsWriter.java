@@ -76,7 +76,7 @@ public class TestsWriter {
 //        writer.incrementSession();
 
         N5FSWriter reader = new N5FSWriter(inputN5Image);
-        V5FSWriter writer = V5FSWriter.convert(reader, inputN5Dataset, masterIndex,dataStore);
+        V5FSWriter writer = V5FSWriter.convert(reader, inputN5Dataset, new V5FSWriter(masterIndex,dataStore));
 
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s:resolutions){

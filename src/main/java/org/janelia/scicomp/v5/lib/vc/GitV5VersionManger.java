@@ -118,7 +118,7 @@ public class GitV5VersionManger extends V5VersionManager {
             StoredConfig cfg = git.getRepository().getConfig();
             cfg.setString("user", null, "name", username);
             cfg.save();
-        } catch (GitAPIException e) {
+        } catch (Exception e) {
             System.out.println("Couldn't clone :" + mountedFile);
             throw new IOException(e);
         }
@@ -204,5 +204,9 @@ public class GitV5VersionManger extends V5VersionManager {
     @Override
     public void checkoutBranch(String branchName) throws IOException {
         checkout(branchName, false);
+    }
+
+    public Git getGit() {
+        return git;
     }
 }

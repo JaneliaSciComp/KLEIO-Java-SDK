@@ -37,6 +37,7 @@ import org.janelia.saalfeldlab.n5.*;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.zarr.N5ZarrWriter;
 import org.janelia.scicomp.v5.lib.tools.FileUtils;
+import org.janelia.scicomp.v5.lib.tools.Utils;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
 import java.io.File;
@@ -52,7 +53,10 @@ import java.util.stream.Stream;
 public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<GitV5VersionManger> {
     protected UnsignedLongType session;
 
-    private final static int[] indexMatrixBlockSize = new int[]{64, 64, 64};
+//    private final static int[] indexMatrixBlockSize = new int[]{64, 64, 64};
+
+    //TODO for test
+    private final static int[] indexMatrixBlockSize = new int[]{2, 2, 2};
     private final static DataType indexMatrixDataType = DataType.UINT64;
     private final static Compression indexMatrixCompression = new GzipCompression();
 
@@ -101,7 +105,10 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
 
     //TODO optimize this change to read block write block
     public void set(String dataset, long[] gridPosition, UnsignedLongType value) throws IOException {
-
+        if (!checkPosition(gridPosition)) {
+            System.out.println("Invalid index: " + Utils.format(gridPosition));
+            return;
+        }
         CachedCellImg<UnsignedLongType, ?> img = N5Utils.open(this, dataset);
         UnsignedLongType p = img.getAt(gridPosition);
         if (p.equals(value))
@@ -110,12 +117,18 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
 
         DatasetAttributes attrs = this.getDatasetAttributes(dataset);
         N5Utils.save(img, this, dataset, attrs.getBlockSize(), attrs.getCompression());
-            //TODO: check - Removed because of bug in Paintera commit test UnsupportedOperationException (IntervalChunks.java:115)
+        //TODO: check - Removed because of bug in Paintera commit test UnsupportedOperationException (IntervalChunks.java:115)
 //            N5Utils.saveRegion(Views.interval(img, new FinalInterval(gridPosition, new long[]{1, 1, 1})), this, dataset);
 
         getVersionManager().addUncommittedBlock(gridPosition);
 
 //
+    }
+
+    private boolean checkPosition(long[] gridPosition) {
+        for (long p : gridPosition)
+            if (p < 0) return false;
+        return true;
     }
 
 
@@ -135,7 +148,7 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
     public boolean remove(String pathName) throws IOException {
         Path path = Paths.get(this.basePath, pathName);
         if (Files.exists(path, new LinkOption[0])) {
-            Stream<Path> pathStream = Files.walk(path).filter(f -> !(f.toString().contains(".git")||f.toString().equals(this.basePath)));
+            Stream<Path> pathStream = Files.walk(path).filter(f -> !(f.toString().contains(".git") || f.toString().equals(this.basePath)));
             Throwable var4 = null;
 
             try {
@@ -195,7 +208,7 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
             }
         }
 
-        getVersionManager().commitAll("remove: "+pathName);
+        getVersionManager().commitAll("remove: " + pathName);
 //        boolean result = !Files.exists(path, new LinkOption[0]);
 //        System.out.println("Remove : "+pathName + " -> "+result);
         return true;
@@ -203,7 +216,7 @@ public class N5ZarrIndexWriter extends N5ZarrWriter implements V5IndexWriter<Git
 
     @Override
     public boolean remove() throws IOException {
-       return this.remove("/");
+        return this.remove("/");
     }
 
     @Override
