@@ -32,11 +32,20 @@ import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class BranchesMergeManager {
@@ -50,12 +59,15 @@ public class BranchesMergeManager {
         this.manager = writer.getIndexWriter().getVersionManager();
     }
 
-    public Map<String, int[][]> getConflicts(String sourceBranch, String targetBranch) throws IOException, GitAPIException {
-        String originalBranch = checkAndCheckout(targetBranch);
-        Map<String, int[][]> conflicts = getBranchChangesToCurrent(sourceBranch);
-        manager.getGit().reset().setMode(ResetCommand.ResetType.HARD).call();
-        return conflicts;
-
+    public Map<String, int[][]> getConflicts(String sourceBranch, String targetBranch) throws IOException {
+        try {
+            String originalBranch = checkAndCheckout(targetBranch);
+            Map<String, int[][]> conflicts = getBranchChangesToCurrent(sourceBranch);
+            manager.getGit().reset().setMode(ResetCommand.ResetType.HARD).call();
+            return conflicts;
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean mergeAndCommit(String sourceBranch, String targetBranch) throws IOException, GitAPIException {
@@ -70,6 +82,44 @@ public class BranchesMergeManager {
         if (originalBranch != null)
             manager.checkoutBranch(originalBranch);
         return true;
+    }
+
+    public RevCommit getCommonAncestor(String branch1, String branch2) {
+        try {
+            Map<String, ObjectId> branches = manager.getBranchesMap();
+            ObjectId obj1 = bgetObjectID(branches, branch1);
+            ObjectId obj2 = bgetObjectID(branches, branch2);
+            RevWalk walk = new RevWalk(manager.getGit().getRepository());
+            RevCommit revA = walk.lookupCommit(obj1);
+            RevCommit revB = walk.lookupCommit(obj2);
+            return getCommonAncestor(revA, revB);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public RevCommit getLastCommit(String branch) throws IOException, GitAPIException {
+        String branchHeader = "refs/heads/";
+        if (!branch.contains(branchHeader))
+            branch = branchHeader+branch;
+        return manager.getGit().log().add(manager.getGit().getRepository().resolve(branch)).call().iterator().next();
+    }
+
+    private ObjectId bgetObjectID(Map<String, ObjectId> branches, String branch) throws IOException {
+        ObjectId obj = branches.get(branch);
+        if (obj == null)
+            throw new IOException("ERROR! " + branch + " not found !");
+        return obj;
+    }
+
+    public RevCommit getCommonAncestor(RevCommit commit1, RevCommit commit2) throws IOException {
+        Repository repo = manager.getGit().getRepository();
+        RevWalk walk = new RevWalk(repo);
+        walk.setRevFilter(RevFilter.MERGE_BASE);
+        walk.markStart(commit1);
+        walk.markStart(commit2);
+        RevCommit mergeBase = walk.next();
+        return mergeBase;
     }
 
     private Map<String, int[][]> getBranchChangesToCurrent(String sourceBranch) throws IOException, GitAPIException {
@@ -91,5 +141,16 @@ public class BranchesMergeManager {
             return originalBranch;
         }
         return null;
+    }
+
+    public Repository getRepo() {
+        return manager.getGit().getRepository();
+    }
+
+    public List<DiffEntry> getDifferences(RevCommit originCommit, RevCommit newCommit) throws IOException {
+        DiffFormatter df = new DiffFormatter(new ByteArrayOutputStream()); // use NullOutputStream.INSTANCE if you don't need the diff output
+        df.setRepository(manager.getGit().getRepository());
+        List<DiffEntry> entries = df.scan(originCommit, newCommit);
+        return entries;
     }
 }

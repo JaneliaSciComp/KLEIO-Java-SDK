@@ -28,6 +28,9 @@
 
 package org.janelia.scicomp.v5.lib.tools;
 
+import org.janelia.saalfeldlab.n5.DataBlock;
+
+import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,31 +51,52 @@ public class Utils {
 
     public static String format(List<long[]> list) {
         String result = "";
-        int i ;
-        for (i = 0;i<list.size()-1;++i){
-            result =  result+format(list.get(i))+"_";
+        int i;
+        for (i = 0; i < list.size() - 1; ++i) {
+            result = result + format(list.get(i)) + "_";
 
         }
-        result = result+format(list.get(i));
+        result = result + format(list.get(i));
         return result;
     }
 
     public static String format(long[] l) {
         String result = "";
-        int i ;
-        for ( i = 0; i < l.length-1; ++i) {
-            result = result+l[i]+"-";
+        int i;
+        for (i = 0; i < l.length - 1; ++i) {
+            result = result + l[i] + "-";
         }
-        result = result+l[i];
+        result = result + l[i];
         return result;
     }
 
 
     public static void main(String[] args) {
-        long[] l = new long[]{2,3,4};
+        long[] l = new long[]{2, 3, 4};
         List<long[]> all = new ArrayList<>();
         all.add(l);
         all.add(l);
         System.out.println(format(all));
+    }
+
+    public static void print2D(int mat[][]) {
+        // Loop through all rows
+        for (int i = 0; i < mat.length; i++)
+
+            // Loop through all elements of current row
+            for (int j = 0; j < mat[i].length; j++)
+                System.out.print(mat[i][j] + " ");
+    }
+
+    public static void printBlock(DataBlock<?> dataBlock) {
+        if (dataBlock == null) {
+            System.out.println(" NULL ");
+            return;
+        }
+        LongBuffer block = dataBlock.toByteBuffer().asLongBuffer();
+        for (int i = 0; i < block.limit(); i++) {
+            System.out.print(block.get(i) + " ");
+        }
+        System.out.println();
     }
 }

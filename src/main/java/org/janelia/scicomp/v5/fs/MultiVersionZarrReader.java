@@ -54,7 +54,6 @@ public class MultiVersionZarrReader extends N5ZarrReader {
     public MultiVersionZarrReader(String basePath, RevCommit commit) throws IOException {
         super(basePath);
         this.repo = new LocalGitRepo(new File(basePath), commit);
-
     }
 
     protected InputStream readGitObject(String objectKey) throws IOException {

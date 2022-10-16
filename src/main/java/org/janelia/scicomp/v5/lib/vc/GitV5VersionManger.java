@@ -31,12 +31,14 @@ package org.janelia.scicomp.v5.lib.vc;
 
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.janelia.scicomp.v5.lib.tools.Utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
+import java.util.*;
 
 
 public class GitV5VersionManger extends V5VersionManager {
@@ -86,6 +88,27 @@ public class GitV5VersionManger extends V5VersionManager {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public String[] getBranches() throws IOException {
+        Set<String> branches = getBranchesMap().keySet();
+        return branches.toArray(new String[branches.size()]);
+    }
+
+    public Map<String, ObjectId> getBranchesMap() throws IOException {
+        try {
+            Map<String, ObjectId> branches = new HashMap<>();
+            List<Ref> refs = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
+            for (Ref ref : refs) {
+                String name = ref.getName().substring(ref.getName().lastIndexOf("/") + 1);
+                branches.put(name, ref.getObjectId());
+            }
+            return branches;
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public static GitV5VersionManger initRepo(String path) throws IOException {
         File file = new File(path);
@@ -195,11 +218,13 @@ public class GitV5VersionManger extends V5VersionManager {
     public void createNewBranch(String branchName) throws IOException {
         try {
             git.branchCreate().setName(branchName).call();
+            checkoutBranch(branchName);
         } catch (Exception e) {
             throw new IOException(e);
         }
 
     }
+
 
     @Override
     public void checkoutBranch(String branchName) throws IOException {

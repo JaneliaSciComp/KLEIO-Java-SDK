@@ -28,6 +28,8 @@
 
 package org.janelia.scicomp.v5.lib.gui;
 
+import bdv.ui.BdvDefaultCards;
+import bdv.ui.CardPanel;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
@@ -42,20 +44,22 @@ import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.scicomp.v5.AbstractV5Reader;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSReader;
+import org.janelia.scicomp.v5.lib.gui.panel.BDVCommitsHistoryPanel;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 import org.janelia.scicomp.v5.lib.uri.V5URL;
 import org.janelia.scicomp.v5.lib.vc.GitUtils;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
-public class BigDataVersionsViewer {
+public class BigDataViewerHistoryBrowser {
 
     private final V5FSReader reader;
-        private Bdv bdv = null;
+    private Bdv bdv = null;
     private final BdvOptions options;
 
-    public BigDataVersionsViewer(V5FSReader reader) {
+    public BigDataViewerHistoryBrowser(V5FSReader reader) {
         this.reader = reader;
         this.options = BdvOptions.options();
     }
@@ -95,7 +99,16 @@ public class BigDataVersionsViewer {
             AbstractV5Reader<MultiVersionZarrReader, N5FSReader> n5 = new AbstractV5Reader<>(new MultiVersionZarrReader(indexPath, commit), rawReader, url);
             showSource(n5, branchName, dataset);
         }
-        BDVUtils.randomColor(bdv);
+        BDVCommitsHistoryPanel bdvCommitHistory = new BDVCommitsHistoryPanel();
+        final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
+        cardPanel.addCard(bdvCommitHistory.getTitle(),
+                bdvCommitHistory.getKey(),
+                bdvCommitHistory,bdvCommitHistory.isExpend(), new Insets(0, 4, 0, 0));
+        cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);
+        cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
+        cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
+        bdv.getBdvHandle().getViewerPanel().requestRepaint();
+        bdv.getBdvHandle().getSplitPanel().repaint();
     }
 
     public static void main(String[] args) throws IOException, GitAPIException {

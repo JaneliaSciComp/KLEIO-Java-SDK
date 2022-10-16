@@ -50,6 +50,10 @@ public interface V5Writer<I extends V5IndexWriter, K extends N5Writer> extends N
         getIndexWriter().getVersionManager().createNewBranch(branchName);
     }
 
+    default String[] getBranches() throws IOException {
+        return getIndexWriter().getVersionManager().getBranches();
+    }
+
     default void checkoutBranch(String branchName) throws IOException {
         getIndexWriter().getVersionManager().checkoutBranch(branchName);
     }

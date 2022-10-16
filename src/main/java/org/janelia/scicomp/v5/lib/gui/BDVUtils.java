@@ -26,54 +26,38 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc;
+package org.janelia.scicomp.v5.lib.gui;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import bdv.tools.brightness.ConverterSetup;
+import bdv.util.Bdv;
+import bdv.util.BdvStackSource;
+import bdv.viewer.Source;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.histogram.DiscreteFrequencyDistribution;
+import net.imglib2.histogram.Histogram1d;
+import net.imglib2.histogram.Real1dBinMapper;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
+import spim.fiji.spimdata.explorer.util.ColorStream;
+
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-public abstract class V5VersionManager {
-    protected List<long[]> uncommittedBlocks = new ArrayList<>();
-
-    protected String userID;
-
-    public String getUserID() {
-        return userID;
+/**
+ * Code copied from BigStitcher
+ * net.preibisch.mvrecon.fiji.spimdata.explorer.popup.BDVPopup
+ **/
+public class BDVUtils {
+    public static <T extends NumericType<T> & NativeType<T>> void randomColor(Bdv bdv) {
+        bdv.getBdvHandle().getViewerPanel().showMessage("Next Random Color");
+        Iterator<ARGBType> iterator = ColorStream.iterator();
+        List<ConverterSetup> converters = bdv.getBdvHandle().getSetupAssignments().getConverterSetups();
+        for (int i = 0; i < converters.size(); ++i)
+            converters.get(i).setColor(iterator.next());
+        bdv.getBdvHandle().getViewerPanel().requestRepaint();
     }
 
-    public List<long[]> getUncommittedBlocks() {
-        return uncommittedBlocks;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-
-    //stage
-    public void addUncommittedBlock(long[] position) {
-        this.uncommittedBlocks.add(position);
-    }
-
-    public void resetUncommittedBlock() {
-        this.uncommittedBlocks.clear();
-    }
-
-
-    public abstract void commitAll(String message) throws IOException;
-
-    public abstract void commitBlocks() throws IOException;
-
-    public abstract void createNewBranch(String branchName) throws IOException;
-
-    public abstract void checkoutBranch(String branchName) throws IOException;
-
-    public abstract String getCurrentBranch() throws IOException;
-
-    public abstract Set<String> getUncommittedChanges() throws IOException;
-
-
-    public abstract Set<String> getUntrackedChanges() throws IOException;
-
-    public abstract String[] getBranches() throws IOException;
 }
