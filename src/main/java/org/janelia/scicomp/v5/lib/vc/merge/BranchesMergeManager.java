@@ -39,12 +39,20 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.janelia.saalfeldlab.n5.DataBlock;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
+import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
+import org.janelia.scicomp.v5.lib.tools.Utils;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockConflictEntry;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockMergeResult;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.Tuple;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -152,5 +160,77 @@ public class BranchesMergeManager {
         df.setRepository(manager.getGit().getRepository());
         List<DiffEntry> entries = df.scan(originCommit, newCommit);
         return entries;
+    }
+
+    public List<BlockConflictEntry> mergeBlocks(V5FSWriter writer, String sourceBranch, String targetBranch) throws IOException, GitAPIException {
+
+        Map<String, int[][]> conflicts = getConflicts(sourceBranch, targetBranch);
+        if (conflicts == null) {
+            System.out.println("No conflict");
+           mergeAndCommit(sourceBranch,targetBranch);
+           return null;
+        }
+
+        String originalBranch = checkAndCheckout(targetBranch);
+        String indexPath = writer.getIndexWriter().getBasePath();
+
+        RevCommit originCommit = getCommonAncestor(sourceBranch,targetBranch);
+        RevCommit branchSourceCommit = getLastCommit(sourceBranch);
+//                System.out.println(branchOneCommit.getFullMessage());
+//                System.out.println(branchOneCommit.getTree());
+        RevCommit branchTargetCommit = getLastCommit(targetBranch);
+
+        MultiVersionZarrReader readerBranchSource = new MultiVersionZarrReader(indexPath,branchSourceCommit);
+        MultiVersionZarrReader readerBranchTarget = new MultiVersionZarrReader(indexPath,branchTargetCommit);
+        MultiVersionZarrReader readerAncestor = new MultiVersionZarrReader(indexPath,originCommit);
+
+
+        boolean allSuccess = true;
+        List<BlockConflictEntry>errorBlocks = new ArrayList<>();
+
+        for (String conflictFile: conflicts.keySet()) {
+            System.out.println("Conflict file: "+conflictFile);
+            Tuple<String,long[]> blockInfo = BlockConflictManager.formatFileInfo(conflictFile);
+            String dataset = blockInfo.getA();
+            long[] gridPosition = blockInfo.getB();
+
+            DatasetAttributes datasetAttributes = readerAncestor.getDatasetAttributes(dataset);
+            DataBlock baseBlock = readerAncestor.readBlock(dataset, datasetAttributes, gridPosition);
+
+            DataBlock<?> deltaOne = BlockConflictManager.getDelta(readerAncestor, readerBranchSource, conflictFile);
+            DataBlock<?> deltaTwo = BlockConflictManager.getDelta(readerAncestor, readerBranchTarget, conflictFile);
+
+//            System.out.print("Delta 1:");
+//            Utils.printBlock(deltaOne);
+//            System.out.print("Delta 2:");
+//            Utils.printBlock(deltaTwo);
+
+            BlockMergeResult blockMergeResult  = BlockConflictManager.mergeDeltas(deltaOne,deltaTwo);
+            if (blockMergeResult.isSuccess()){
+//                System.out.println("success!");
+                DataBlock<?> resultBlock = BlockConflictManager.overwriteBlock(baseBlock,blockMergeResult.getResultBlock());
+                writer.writeBlock(dataset,datasetAttributes,resultBlock);
+                errorBlocks.add(new BlockConflictEntry(gridPosition));
+            }else {
+                allSuccess = false;
+//                System.out.println("Error ! "+Utils.format(blockMergeResult.getBlockConflicts()));
+                errorBlocks.add(new BlockConflictEntry(gridPosition, blockMergeResult.getBlockConflicts()));
+            }
+
+        }
+        if (allSuccess) {
+            manager.commitAll("merge " + sourceBranch);
+            System.out.println("Success, Block and Branches merged ! ");
+
+        }
+        else {
+            manager.getGit().reset().setMode(ResetCommand.ResetType.HARD).call();
+            System.out.println("Merge didn't succeed, check conflict blocks");
+        }
+
+        if (originalBranch != null)
+            manager.checkoutBranch(originalBranch);
+
+        return errorBlocks;
     }
 }

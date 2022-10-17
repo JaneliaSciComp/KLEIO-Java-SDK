@@ -26,7 +26,7 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc.merge;
+package org.janelia.scicomp.v5.lib.vc.merge.test;
 
 import com.google.common.collect.Lists;
 import org.eclipse.jgit.api.errors.GitAPIException;

@@ -26,22 +26,31 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc.merge;
+package org.janelia.scicomp.v5.lib.vc.merge.test;
 
-public class Tuple<A, B> {
-    private final A a;
-    private final B b;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.janelia.scicomp.v5.lib.vc.merge.BranchesMergeManager;
 
-    public Tuple(A a, B b) {
-        this.a = a;
-        this.b = b;
-    }
+import java.io.ByteArrayOutputStream;
+import java.util.List;
 
-    public A getA() {
-        return a;
-    }
+public class CommitDiffTest {
+    public static void main(String[] args) throws Exception {
+        String indexPath = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex";
+        BranchesMergeManager manager = new BranchesMergeManager(indexPath);
+        RevCommit originCommit = manager.getCommonAncestor("annotator_1", "annotator_2");
+        System.out.println(originCommit.getFullMessage());
 
-    public B getB() {
-        return b;
+        RevCommit newCommit = manager.getLastCommit("annotator_2");
+        System.out.println(newCommit.getName());
+
+        List<DiffEntry> entries = manager.getDifferences(originCommit,newCommit);
+
+
     }
 }

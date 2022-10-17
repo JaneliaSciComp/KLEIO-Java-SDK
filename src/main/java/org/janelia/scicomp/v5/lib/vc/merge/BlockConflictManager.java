@@ -28,13 +28,12 @@
 
 package org.janelia.scicomp.v5.lib.vc.merge;
 
-import net.imglib2.type.NativeType;
-import org.bouncycastle.util.Longs;
 import org.janelia.saalfeldlab.n5.DataBlock;
-import org.janelia.saalfeldlab.n5.DataType;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.lib.tools.Utils;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockMergeResult;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.Tuple;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,7 +41,6 @@ import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class BlockConflictManager {
     public static DataBlock<?> getDelta(MultiVersionZarrReader readerAncestor, MultiVersionZarrReader readerBranchOne, String conflictFile) throws IOException {
@@ -52,7 +50,7 @@ public class BlockConflictManager {
         String grid = conflictFile.substring(conflictFile.lastIndexOf("/") + 1);
         long[] gridPosition = toPosition(grid);
 
-        DataType dType = readerAncestor.getDatasetAttributes(dataset).getDataType();
+//        DataType dType = readerAncestor.getDatasetAttributes(dataset).getDataType();
 
 //        System.out.println("Delta: dataset: " + dataset + " | Grid Position: " + Utils.format(gridPosition) + " | Data type: " + dType);
 
@@ -91,7 +89,7 @@ public class BlockConflictManager {
         }
 
         end.put(result);
-        ByteBuffer bb = ByteBuffer.allocate(result.length * 8 );
+        ByteBuffer bb = ByteBuffer.allocate(result.length * 8);
         endBlock.readData(bb);
 
         return endBlock;
@@ -116,29 +114,29 @@ public class BlockConflictManager {
                 result[i] = two.get(0);
                 continue;
             }
-            if (two.get(i)==0){
+            if (two.get(i) == 0) {
                 result[i] = one.get(0);
                 continue;
             }
-            result[i]= -1;
+            result[i] = -1;
             success = false;
             blockConflicts.add(Long.valueOf(i));
         }
 
         two.put(result);
-        ByteBuffer bb = ByteBuffer.allocate(result.length * 8 );
+        ByteBuffer bb = ByteBuffer.allocate(result.length * 8);
         deltaTwo.readData(bb);
 
-        return new BlockMergeResult(deltaTwo, blockConflicts.stream().mapToLong(l -> l).toArray(),success);
+        return new BlockMergeResult(deltaTwo, blockConflicts.stream().mapToLong(l -> l).toArray(), success);
     }
 
-    public static Tuple<String,long[]> formatFileInfo(String file) {
+    public static Tuple<String, long[]> formatFileInfo(String file) {
         String dataset = file.substring(0, file.lastIndexOf("/"));
 
         String grid = file.substring(file.lastIndexOf("/") + 1);
         long[] gridPosition = toPosition(grid);
 
-        return new Tuple<>(dataset,gridPosition);
+        return new Tuple<>(dataset, gridPosition);
     }
 
     public static DataBlock<?> overwriteBlock(DataBlock baseBlock, DataBlock<?> endBlock) throws IOException {
@@ -154,13 +152,13 @@ public class BlockConflictManager {
         for (int i = 0; i < end.limit(); i++) {
             if (end.get(i) == 0) {
                 result[i] = base.get(i);
-            }else {
+            } else {
                 result[i] = end.get(i);
             }
         }
 
         end.put(result);
-        ByteBuffer bb = ByteBuffer.allocate(result.length * 8 );
+        ByteBuffer bb = ByteBuffer.allocate(result.length * 8);
         endBlock.readData(bb);
 
         return endBlock;

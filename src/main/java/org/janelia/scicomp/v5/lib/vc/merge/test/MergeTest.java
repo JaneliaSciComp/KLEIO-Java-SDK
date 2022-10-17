@@ -26,11 +26,12 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc.merge;
+package org.janelia.scicomp.v5.lib.vc.merge.test;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.tools.Utils;
+import org.janelia.scicomp.v5.lib.vc.merge.BranchesMergeManager;
 
 import java.io.IOException;
 import java.util.Map;

@@ -26,19 +26,20 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc.merge;
+package org.janelia.scicomp.v5.lib.vc.merge.test;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.janelia.saalfeldlab.n5.DataBlock;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.lib.tools.Utils;
+import org.janelia.scicomp.v5.lib.vc.merge.BlockConflictManager;
+import org.janelia.scicomp.v5.lib.vc.merge.BranchesMergeManager;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockMergeResult;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.Tuple;
 
 import java.io.IOException;
-import java.nio.LongBuffer;
-import java.util.List;
 import java.util.Map;
 
 public class ConflictMergeTest {

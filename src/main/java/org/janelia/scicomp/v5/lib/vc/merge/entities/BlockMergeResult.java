@@ -26,7 +26,7 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc.merge;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
 import org.janelia.saalfeldlab.n5.DataBlock;
 

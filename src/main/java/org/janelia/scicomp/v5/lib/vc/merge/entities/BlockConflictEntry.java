@@ -26,30 +26,51 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc.merge;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
+public class BlockConflictEntry {
+    private final long[] gridPosition;
+    private final long[] conflicts;
 
-import java.io.ByteArrayOutputStream;
-import java.util.List;
+    private int[] selectedBranch;
 
-public class CommitDiffTest {
-    public static void main(String[] args) throws Exception {
-        String indexPath = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex";
-        BranchesMergeManager manager = new BranchesMergeManager(indexPath);
-        RevCommit originCommit = manager.getCommonAncestor("annotator_1", "annotator_2");
-        System.out.println(originCommit.getFullMessage());
+    private final boolean merged;
 
-        RevCommit newCommit = manager.getLastCommit("annotator_2");
-        System.out.println(newCommit.getName());
+    public BlockConflictEntry(long[] gridPosition, long[] conflicts) {
+        this.gridPosition = gridPosition;
+        this.conflicts = conflicts;
+        this.merged = false;
+    }
 
-        List<DiffEntry> entries = manager.getDifferences(originCommit,newCommit);
+    public BlockConflictEntry(long[] gridPosition) {
+        this.gridPosition = gridPosition;
+        this.conflicts = null;
+        this.merged = true;
+    }
 
+    public BlockConflictEntry(long[] gridPosition, long[] conflicts, boolean merged) {
+        this.gridPosition = gridPosition;
+        this.conflicts = conflicts;
+        this.merged = merged;
+    }
 
+    public int[] getSelectedBranch() {
+        return selectedBranch;
+    }
+
+    public void setSelectedBranch(int[] selectedBranch) {
+        this.selectedBranch = selectedBranch;
+    }
+
+    public boolean isMerged() {
+        return merged;
+    }
+
+    public long[] getGridPosition() {
+        return gridPosition;
+    }
+
+    public long[] getConflicts() {
+        return conflicts;
     }
 }
