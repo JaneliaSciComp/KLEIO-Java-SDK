@@ -26,36 +26,53 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.indexes;
+package org.janelia.scicomp.v5.lib.gui.panel;
 
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.janelia.saalfeldlab.n5.N5Reader;
-import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.scicomp.v5.lib.tools.SessionId;
-import org.janelia.scicomp.v5.lib.vc.V5VersionManager;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.MergeBranches;
 
-import java.io.IOException;
+import javax.swing.*;
 
-public interface V5IndexWriter<G extends V5VersionManager> extends N5Writer, N5Reader {
+public class BranchMergeSelectionGUI {
 
-    G getVersionManager();
+    private final String[] branches;
 
-    UnsignedLongType getSession();
+    public BranchMergeSelectionGUI(String[] branches) {
+        this.branches = branches;
 
-    void setSession(UnsignedLongType session);
-
-    default UnsignedLongType incrementSession() throws IOException {
-        setSession(SessionId.getNextId());
-        return getSession();
     }
 
-    //TODO change to version
-    default UnsignedLongType getCurrentSession() throws IOException {
-        if (getSession() == null)
-            return incrementSession();
-        return getSession();
+    public static void main(String[] args) {
+        String s1[] = {"Jalpaiguri", "Mumbai", "Noida", "Kolkata", "New Delhi"};
+        MergeBranches mergeBranches = new BranchMergeSelectionGUI(s1).getBranches();
+        System.out.println(mergeBranches);
     }
 
-    void set(String dataset, long[] gridPosition) throws IOException;
+    public MergeBranches getBranches() {
+        String sourceBranch = (String) JOptionPane.showInputDialog(
+                null,
+                "Select Source branch: ",
+                "Source branch",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                branches,
+                branches[branches.length - 1]);
 
+        if (sourceBranch == null)
+            return null;
+
+        String targetBranch = (String) JOptionPane.showInputDialog(
+                null,
+                "Select Target branch: ",
+                "Target branch",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                branches,
+                branches[0]);
+
+        if (targetBranch == null)
+            return null;
+
+        return new MergeBranches(sourceBranch, targetBranch);
+    }
 }
+

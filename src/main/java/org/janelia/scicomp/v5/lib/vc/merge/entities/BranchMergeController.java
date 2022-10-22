@@ -26,36 +26,35 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.indexes;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.janelia.saalfeldlab.n5.N5Reader;
-import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.scicomp.v5.lib.tools.SessionId;
-import org.janelia.scicomp.v5.lib.vc.V5VersionManager;
+import org.janelia.scicomp.v5.fs.V5FSWriter;
+import org.janelia.scicomp.v5.lib.vc.merge.BranchesMergeManager;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public interface V5IndexWriter<G extends V5VersionManager> extends N5Writer, N5Reader {
+public class BranchMergeController implements AbstractBranchMergeController {
+    private final BranchesMergeManager manager;
+    private final V5FSWriter writer;
 
-    G getVersionManager();
-
-    UnsignedLongType getSession();
-
-    void setSession(UnsignedLongType session);
-
-    default UnsignedLongType incrementSession() throws IOException {
-        setSession(SessionId.getNextId());
-        return getSession();
+    public BranchMergeController(V5FSWriter writer) throws IOException {
+        String indexPath = writer.getIndexWriter().getBasePath();
+        this.manager = new BranchesMergeManager(indexPath);
+        this.writer = writer;
     }
 
-    //TODO change to version
-    default UnsignedLongType getCurrentSession() throws IOException {
-        if (getSession() == null)
-            return incrementSession();
-        return getSession();
+    @Override
+    public ImgMergeResult merge(MergeBranches mergeBranches) throws Exception {
+        return manager.mergeBlocks(writer, mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch());
     }
 
-    void set(String dataset, long[] gridPosition) throws IOException;
-
+    @Override
+    public boolean mergeConflicts(MergeBranches mergeBranches, List<BlockConflictEntry> conflicts) throws Exception {
+        List<BlockConflictEntry> filteredConflicts = conflicts.stream().filter(e -> !e.isMerged()).collect(Collectors.toList());
+        if (!filteredConflicts.stream().filter(e-> e.getSelectedBranch() == 0).collect(Collectors.toList()).isEmpty())
+            throw new IOException("Select branch before !");
+        return manager.mergeConflictBlocks(writer,mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch(),filteredConflicts);
+    }
 }

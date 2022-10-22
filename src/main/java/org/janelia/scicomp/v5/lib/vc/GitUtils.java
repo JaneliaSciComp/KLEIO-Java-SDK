@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GitUtils {
     private final Git git;
@@ -49,6 +50,19 @@ public class GitUtils {
 
     public List<Ref> getBranches() throws GitAPIException {
         return git.branchList().call();
+    }
+
+    public String[] getBranchesNames() throws GitAPIException {
+        List<String> branches = getBranches().stream().map(b -> b.getName().replace("refs/", "").replace("heads/", "")).collect(Collectors.toList());
+        return branches.toArray(new String[branches.size()]);
+    }
+
+    public Ref getBranch(String branchName) throws GitAPIException, IOException {
+        List<Ref> branches = getBranches();
+        for (Ref b:branches)
+            if(b.getName().contains(branchName))
+                return b;
+        throw new IOException("ERROR : branch "+branchName+ "not found !" );
     }
 
     public RevCommit getLastCommitForBranch(Ref branch) throws IncorrectObjectTypeException, MissingObjectException, GitAPIException {

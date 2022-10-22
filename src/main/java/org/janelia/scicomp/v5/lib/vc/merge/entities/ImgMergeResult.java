@@ -26,36 +26,54 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.indexes;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.janelia.saalfeldlab.n5.N5Reader;
-import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.scicomp.v5.lib.tools.SessionId;
-import org.janelia.scicomp.v5.lib.vc.V5VersionManager;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.IOException;
+public class ImgMergeResult {
 
-public interface V5IndexWriter<G extends V5VersionManager> extends N5Writer, N5Reader {
+    public enum Case {
+        NO_CONFLICT("Success: Merged without conflict"),
+        CONFLICT_MERGED("Success: Index conflicts but fixed"),
+        CONFLICT_NEED_MANUAL_SELECTION("ERROR: conflict need to be fixed manually");
 
-    G getVersionManager();
+        private final String message;
 
-    UnsignedLongType getSession();
+        public String getMessage() {
+            return message;
+        }
 
-    void setSession(UnsignedLongType session);
-
-    default UnsignedLongType incrementSession() throws IOException {
-        setSession(SessionId.getNextId());
-        return getSession();
+        Case(String message) {
+            this.message = message;
+        }
     }
 
-    //TODO change to version
-    default UnsignedLongType getCurrentSession() throws IOException {
-        if (getSession() == null)
-            return incrementSession();
-        return getSession();
+    final List<BlockConflictEntry> conflicts;
+    final Case result;
+    public ImgMergeResult(List<BlockConflictEntry> conflicts, Case result) {
+        this.conflicts = conflicts;
+        this.result = result;
     }
 
-    void set(String dataset, long[] gridPosition) throws IOException;
+    public ImgMergeResult() {
+        this.result = null;
+        this.conflicts = new ArrayList<>();
+    }
+
+    public ImgMergeResult(Case result) {
+        this.result = result;
+        this.conflicts = new ArrayList<>();
+    }
+
+    public List<BlockConflictEntry> getConflicts() {
+        return conflicts;
+    }
+
+    public Case getResult() {
+        return result;
+    }
 
 }
+
+

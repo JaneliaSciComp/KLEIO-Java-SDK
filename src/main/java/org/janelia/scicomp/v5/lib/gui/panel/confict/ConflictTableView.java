@@ -28,6 +28,9 @@
 
 package org.janelia.scicomp.v5.lib.gui.panel.confict;
 
+import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockConflictEntry;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.ImgMergeResult;
+
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -37,22 +40,32 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConflictTableView extends JScrollPane {
+public class ConflictTableView extends JTable {
 
-    public ConflictTableView(List<ConflictBlockViewModel> conflicts) {
-        super(getTableView(conflicts));
+
+    public ConflictTableView() {
+        super();
+        ConflictTableModel model = new ConflictTableModel();
+        setModel(model);
+        addMouseListener(new JTableButtonMouseListener(this));
+        TableColumn branchColumn = getColumnModel().getColumn(0);
+        branchColumn.setCellRenderer(new JTableButtonRenderer());
+        branchColumn.setPreferredWidth(30);
+        getColumnModel().getColumn(1).setPreferredWidth(100);
+        setRowHeight(40);
+        setFillsViewportHeight(true);
     }
 
-    private static Component getTableView(List<ConflictBlockViewModel> conflicts) {
-        JTable table = new JTable(new ConflictTableModel(conflicts));
-        table.addMouseListener(new JTableButtonMouseListener(table));
-        TableColumn branchColumn = table.getColumnModel().getColumn(0);
-        branchColumn.setCellRenderer(new JTableButtonRenderer());
-        branchColumn.setPreferredWidth(20);
-        table.getColumnModel().getColumn(1).setPreferredWidth(100);
-        table.setRowHeight(30);
-        table.setFillsViewportHeight(true);
-        return table;
+    public void updateConflicts(ImgMergeResult imgMergeResult){
+        ((ConflictTableModel)getModel()).setElms(imgMergeResult);
+        repaint();
+        revalidate();
+    }
+
+
+
+    public List<BlockConflictEntry> getConflicts(){
+        return ((ConflictTableModel) getModel()).getElms();
     }
 
     private static class JTableButtonMouseListener extends MouseAdapter {
@@ -79,8 +92,6 @@ public class ConflictTableView extends JScrollPane {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             JPanel panel = new JPanel();
-            panel.setLayout(new GridBagLayout());
-            panel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             JButton button = (JButton) value;
             panel.add(button);
             return panel;
@@ -88,12 +99,13 @@ public class ConflictTableView extends JScrollPane {
     }
 
     public static void main(String[] args) {
-        List<ConflictBlockViewModel> conflicts = new ArrayList<>();
-        conflicts.add(new ConflictBlockViewModel(new long[]{2, 3, 4}));
-        conflicts.add(new ConflictBlockViewModel(new long[]{0, 6, 4}));
-        conflicts.add(new ConflictBlockViewModel(new long[]{0, 8, 4}));
-        conflicts.add(new ConflictBlockViewModel(new long[]{9, 4, 4}));
-        ConflictTableView table = new ConflictTableView(conflicts);
+        List<BlockConflictEntry> conflicts = new ArrayList<>();
+        conflicts.add(new BlockConflictEntry(new long[]{2, 3, 4}));
+        conflicts.add(new BlockConflictEntry(new long[]{0, 6, 4}));
+        conflicts.add(new BlockConflictEntry(new long[]{0, 8, 4}));
+        conflicts.add(new BlockConflictEntry(new long[]{9, 4, 4}));
+        ConflictTableView table = new ConflictTableView();
+        table.updateConflicts(new ImgMergeResult(conflicts, ImgMergeResult.Case.CONFLICT_NEED_MANUAL_SELECTION));
 
         JFrame frame = new JFrame("Test");
         frame.setSize(new Dimension(300, 600));

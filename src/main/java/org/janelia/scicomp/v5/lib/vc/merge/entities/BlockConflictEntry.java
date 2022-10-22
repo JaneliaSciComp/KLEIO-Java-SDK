@@ -28,13 +28,42 @@
 
 package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
+import org.janelia.scicomp.v5.lib.tools.Utils;
+
 public class BlockConflictEntry {
     private final long[] gridPosition;
     private final long[] conflicts;
-
-    private int[] selectedBranch;
-
     private final boolean merged;
+
+    // 0 Nothing selected | 1 Branch Source | 2 Branch target
+    private int selectedBranch = 0;
+
+    public void setSelectedBranch(int selectedBranch) {
+        this.selectedBranch = selectedBranch;
+    }
+
+    public int getSelectedBranch() {
+        return selectedBranch;
+    }
+
+    public String getBranchString() {
+        switch (selectedBranch) {
+            case 0:
+                return "_";
+            case 1:
+                return "S";
+            case 2:
+                return "T";
+            default:
+                throw new RuntimeException("ERROR! Invalid Branch " + selectedBranch);
+        }
+    }
+
+    public void getNextBranch() {
+        if (selectedBranch == 2)
+            selectedBranch = 0;
+        else selectedBranch = selectedBranch + 1;
+    }
 
     public BlockConflictEntry(long[] gridPosition, long[] conflicts) {
         this.gridPosition = gridPosition;
@@ -54,20 +83,16 @@ public class BlockConflictEntry {
         this.merged = merged;
     }
 
-    public int[] getSelectedBranch() {
-        return selectedBranch;
-    }
-
-    public void setSelectedBranch(int[] selectedBranch) {
-        this.selectedBranch = selectedBranch;
-    }
-
     public boolean isMerged() {
         return merged;
     }
 
     public long[] getGridPosition() {
         return gridPosition;
+    }
+
+    public String getStringGridPosition(){
+        return Utils.format(gridPosition);
     }
 
     public long[] getConflicts() {

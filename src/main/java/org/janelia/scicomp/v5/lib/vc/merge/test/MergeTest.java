@@ -41,21 +41,20 @@ public class MergeTest {
         String indexPath = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex";
         String kvPath = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/datastore";
 
-        V5FSWriter writer = new V5FSWriter(indexPath, kvPath);
-        String[] branches = writer.getBranches();
-        for (int i = 0; i < branches.length; i++) {
-            for (int j = i; j < branches.length; j++) {
-                String b1 = branches[i];
-                String b2 = branches[j];
-                if (!b1.equals(b2)) {
-                    System.out.println(b1 + " vs " + b2);
-                    Map<String, int[][]> conflicts = new BranchesMergeManager(writer.getIndexWriter().getBasePath()).getConflicts(b1, b2);
-                    printConflict(conflicts);
+        try (V5FSWriter writer = new V5FSWriter(indexPath, kvPath)){
+            String[] branches = writer.getBranches();
+            for (int i = 0; i < branches.length; i++) {
+                for (int j = i; j < branches.length; j++) {
+                    String b1 = branches[i];
+                    String b2 = branches[j];
+                    if (!b1.equals(b2)) {
+                        System.out.println(b1 + " vs " + b2);
+                        Map<String, int[][]> conflicts = new BranchesMergeManager(writer.getIndexWriter().getBasePath()).getConflicts(b1, b2);
+                        printConflict(conflicts);
+                    }
                 }
             }
         }
-
-
     }
 
     private static void printConflict(Map<String, int[][]> conflicts) {

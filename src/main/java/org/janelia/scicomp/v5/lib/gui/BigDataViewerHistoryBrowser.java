@@ -44,6 +44,7 @@ import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.scicomp.v5.AbstractV5Reader;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSReader;
+import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.gui.panel.BDVCommitsHistoryPanel;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 import org.janelia.scicomp.v5.lib.uri.V5URL;
@@ -115,7 +116,7 @@ public class BigDataViewerHistoryBrowser {
         V5FSURL url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store\"}");
         V5FSReader raw = new V5FSReader(url);
         V5FSURL branches_url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/datastore\"}");
-        V5FSReader branches = new V5FSReader(branches_url);
+        V5FSWriter branches = new V5FSWriter(branches_url);
         BigDataVersionsViewer bdv = new BigDataVersionsViewer(branches);
         bdv.showRaw(raw,"/volumes/crop129/labels/all");
         bdv.show("annotation/data/s0");

@@ -26,36 +26,11 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.indexes;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.janelia.saalfeldlab.n5.N5Reader;
-import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.scicomp.v5.lib.tools.SessionId;
-import org.janelia.scicomp.v5.lib.vc.V5VersionManager;
+import java.util.List;
 
-import java.io.IOException;
-
-public interface V5IndexWriter<G extends V5VersionManager> extends N5Writer, N5Reader {
-
-    G getVersionManager();
-
-    UnsignedLongType getSession();
-
-    void setSession(UnsignedLongType session);
-
-    default UnsignedLongType incrementSession() throws IOException {
-        setSession(SessionId.getNextId());
-        return getSession();
-    }
-
-    //TODO change to version
-    default UnsignedLongType getCurrentSession() throws IOException {
-        if (getSession() == null)
-            return incrementSession();
-        return getSession();
-    }
-
-    void set(String dataset, long[] gridPosition) throws IOException;
-
+public interface AbstractBranchMergeController {
+    ImgMergeResult merge(MergeBranches mergeBranches) throws Exception;
+    boolean mergeConflicts(MergeBranches mergeBranches, List<BlockConflictEntry> conflicts) throws Exception;
 }

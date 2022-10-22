@@ -26,49 +26,8 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.gui.panel.confict;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import org.janelia.scicomp.v5.lib.tools.Utils;
-
-public class ConflictBlockViewModel {
-
-    // 0 Nothing selected | 1 Branch Source | 2 Branch target
-    private int selectedBranch = 0;
-    private long[] gridPosition;
-
-    public ConflictBlockViewModel(long[] gridPosition) {
-        this.gridPosition = gridPosition;
-    }
-
-    public void setSelectedBranch(int selectedBranch) {
-        this.selectedBranch = selectedBranch;
-    }
-
-    public int getSelectedBranch() {
-        return selectedBranch;
-    }
-
-    public void getNextBranch() {
-        if (selectedBranch == 2)
-            selectedBranch = 0;
-        else selectedBranch = selectedBranch + 1;
-    }
-
-    public String getBranchString() {
-        switch (selectedBranch) {
-            case 0:
-                return "_";
-            case 1:
-                return "S";
-            case 2:
-                return "T";
-            default:
-                throw new RuntimeException("ERROR! Invalid Branch " + selectedBranch);
-        }
-    }
-
-
-    public String getGridPosition() {
-        return Utils.format(gridPosition);
-    }
+public interface AbstractCallBack<V> {
+    void call(V v) throws Exception;
 }

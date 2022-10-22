@@ -111,11 +111,11 @@ public class BlockConflictManager {
         long[] result = new long[one.limit()];
         for (int i = 0; i < one.limit(); i++) {
             if (one.get(i) == 0) {
-                result[i] = two.get(0);
+                result[i] = two.get(i);
                 continue;
             }
             if (two.get(i) == 0) {
-                result[i] = one.get(0);
+                result[i] = one.get(i);
                 continue;
             }
             result[i] = -1;
@@ -128,6 +128,39 @@ public class BlockConflictManager {
         deltaTwo.readData(bb);
 
         return new BlockMergeResult(deltaTwo, blockConflicts.stream().mapToLong(l -> l).toArray(), success);
+    }
+
+
+    public static DataBlock<?> mergeDeltasUsingConflictVote(DataBlock<?> deltaOne, DataBlock<?> deltaTwo, int voteIfConflict) throws IOException {
+        if (deltaOne == null || deltaTwo == null)
+            throw new IOException("ERROR ! Delta is null, can't merge ! ");
+
+        LongBuffer one = deltaOne.toByteBuffer().asLongBuffer();
+        LongBuffer two = deltaTwo.toByteBuffer().asLongBuffer();
+        long[] result = new long[one.limit()];
+        for (int i = 0; i < one.limit(); i++) {
+            if (one.get(i) == 0) {
+                result[i] = two.get(i);
+                continue;
+            }
+            if (two.get(i) == 0) {
+                result[i] = one.get(i);
+                continue;
+            }
+            if (voteIfConflict == 1){
+                result[i] = one.get(i);
+            } else if (voteIfConflict == 2) {
+                result[i] = two.get(i);
+            }else {
+                throw new IOException("Invalid conflict vote :"+voteIfConflict);
+            }
+        }
+
+        two.put(result);
+        ByteBuffer bb = ByteBuffer.allocate(result.length * 8);
+        deltaTwo.readData(bb);
+
+        return deltaTwo;
     }
 
     public static Tuple<String, long[]> formatFileInfo(String file) {

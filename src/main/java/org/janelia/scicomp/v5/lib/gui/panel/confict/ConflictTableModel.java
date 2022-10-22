@@ -28,24 +28,33 @@
 
 package org.janelia.scicomp.v5.lib.gui.panel.confict;
 
+import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockConflictEntry;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.ImgMergeResult;
+
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.util.List;
 
 
 public class ConflictTableModel extends AbstractTableModel {
     private final static String[] COLUMNS = {"Branch", "Block"};
-    private final List<ConflictBlockViewModel> elms;
+    private ImgMergeResult imgMergeResult= new ImgMergeResult();;
 
-    public ConflictTableModel(List<ConflictBlockViewModel> elms) {
-        this.elms = elms;
+    public ConflictTableModel() {
+    }
+
+    public void setElms(ImgMergeResult imgMergeResult) {
+        this.imgMergeResult = imgMergeResult;
+    }
+
+    public List<BlockConflictEntry> getElms() {
+        return imgMergeResult.getConflicts();
     }
 
     @Override
     public int getRowCount() {
-        return elms.size();
+        return imgMergeResult.getConflicts().size();
     }
 
     @Override
@@ -60,17 +69,24 @@ public class ConflictTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        ConflictBlockViewModel elm = elms.get(rowIndex);
+        BlockConflictEntry elm = imgMergeResult.getConflicts().get(rowIndex);
         switch (columnIndex) {
             case 0:
+
                 final JButton button = new JButton(elm.getBranchString());
-                button.addActionListener(arg0 -> {
-                    elm.getNextBranch();
-                    button.setText(elm.getBranchString());
-                });
+                button.setPreferredSize(new Dimension(20, 20));
+                button.setSize(new Dimension(20, 20));
+                if (elm.isMerged()){
+                    button.setVisible(false);
+                }else{
+                    button.addActionListener(arg0 -> {
+                        elm.getNextBranch();
+                        button.setText(elm.getBranchString());
+                    });
+                }
                 return button;
             case 1:
-                return elm.getGridPosition();
+                return elm.getStringGridPosition();
             default:
                 throw new RuntimeException("Column " + columnIndex + " not implemented!");
         }

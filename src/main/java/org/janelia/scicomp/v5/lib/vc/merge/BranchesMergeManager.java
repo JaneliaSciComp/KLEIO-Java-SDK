@@ -44,10 +44,10 @@ import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
-import org.janelia.scicomp.v5.lib.tools.Utils;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockConflictEntry;
 import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockMergeResult;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.ImgMergeResult;
 import org.janelia.scicomp.v5.lib.vc.merge.entities.Tuple;
 
 import java.io.ByteArrayOutputStream;
@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BranchesMergeManager {
     private final GitV5VersionManger manager;
@@ -109,7 +111,7 @@ public class BranchesMergeManager {
     public RevCommit getLastCommit(String branch) throws IOException, GitAPIException {
         String branchHeader = "refs/heads/";
         if (!branch.contains(branchHeader))
-            branch = branchHeader+branch;
+            branch = branchHeader + branch;
         return manager.getGit().log().add(manager.getGit().getRepository().resolve(branch)).call().iterator().next();
     }
 
@@ -162,35 +164,36 @@ public class BranchesMergeManager {
         return entries;
     }
 
-    public List<BlockConflictEntry> mergeBlocks(V5FSWriter writer, String sourceBranch, String targetBranch) throws IOException, GitAPIException {
+    public ImgMergeResult mergeBlocks(V5FSWriter writer, String sourceBranch, String targetBranch) throws IOException, GitAPIException {
 
         Map<String, int[][]> conflicts = getConflicts(sourceBranch, targetBranch);
         if (conflicts == null) {
             System.out.println("No conflict");
-           mergeAndCommit(sourceBranch,targetBranch);
-           return null;
+            mergeAndCommit(sourceBranch, targetBranch);
+            return new ImgMergeResult(ImgMergeResult.Case.NO_CONFLICT);
         }
+        print(conflicts.keySet());
 
         String originalBranch = checkAndCheckout(targetBranch);
         String indexPath = writer.getIndexWriter().getBasePath();
 
-        RevCommit originCommit = getCommonAncestor(sourceBranch,targetBranch);
+        RevCommit originCommit = getCommonAncestor(sourceBranch, targetBranch);
         RevCommit branchSourceCommit = getLastCommit(sourceBranch);
 //                System.out.println(branchOneCommit.getFullMessage());
 //                System.out.println(branchOneCommit.getTree());
         RevCommit branchTargetCommit = getLastCommit(targetBranch);
 
-        MultiVersionZarrReader readerBranchSource = new MultiVersionZarrReader(indexPath,branchSourceCommit);
-        MultiVersionZarrReader readerBranchTarget = new MultiVersionZarrReader(indexPath,branchTargetCommit);
-        MultiVersionZarrReader readerAncestor = new MultiVersionZarrReader(indexPath,originCommit);
+        MultiVersionZarrReader readerBranchSource = new MultiVersionZarrReader(indexPath, branchSourceCommit);
+        MultiVersionZarrReader readerBranchTarget = new MultiVersionZarrReader(indexPath, branchTargetCommit);
+        MultiVersionZarrReader readerAncestor = new MultiVersionZarrReader(indexPath, originCommit);
 
 
         boolean allSuccess = true;
-        List<BlockConflictEntry>errorBlocks = new ArrayList<>();
+        List<BlockConflictEntry> errorBlocks = new ArrayList<>();
 
-        for (String conflictFile: conflicts.keySet()) {
-            System.out.println("Conflict file: "+conflictFile);
-            Tuple<String,long[]> blockInfo = BlockConflictManager.formatFileInfo(conflictFile);
+        for (String conflictFile : conflicts.keySet()) {
+            System.out.println("Conflict file: " + conflictFile);
+            Tuple<String, long[]> blockInfo = BlockConflictManager.formatFileInfo(conflictFile);
             String dataset = blockInfo.getA();
             long[] gridPosition = blockInfo.getB();
 
@@ -205,32 +208,102 @@ public class BranchesMergeManager {
 //            System.out.print("Delta 2:");
 //            Utils.printBlock(deltaTwo);
 
-            BlockMergeResult blockMergeResult  = BlockConflictManager.mergeDeltas(deltaOne,deltaTwo);
-            if (blockMergeResult.isSuccess()){
+            BlockMergeResult blockMergeResult = BlockConflictManager.mergeDeltas(deltaOne, deltaTwo);
+            if (blockMergeResult.isSuccess()) {
 //                System.out.println("success!");
-                DataBlock<?> resultBlock = BlockConflictManager.overwriteBlock(baseBlock,blockMergeResult.getResultBlock());
-                writer.writeBlock(dataset,datasetAttributes,resultBlock);
+                DataBlock<?> resultBlock = BlockConflictManager.overwriteBlock(baseBlock, blockMergeResult.getResultBlock());
+                writer.writeBlock(dataset, datasetAttributes, resultBlock);
                 errorBlocks.add(new BlockConflictEntry(gridPosition));
-            }else {
+            } else {
                 allSuccess = false;
 //                System.out.println("Error ! "+Utils.format(blockMergeResult.getBlockConflicts()));
                 errorBlocks.add(new BlockConflictEntry(gridPosition, blockMergeResult.getBlockConflicts()));
             }
 
         }
+        ImgMergeResult.Case result;
         if (allSuccess) {
             manager.commitAll("merge " + sourceBranch);
             System.out.println("Success, Block and Branches merged ! ");
-
-        }
-        else {
+            result = ImgMergeResult.Case.CONFLICT_MERGED;
+        } else {
             manager.getGit().reset().setMode(ResetCommand.ResetType.HARD).call();
             System.out.println("Merge didn't succeed, check conflict blocks");
+            result = ImgMergeResult.Case.CONFLICT_NEED_MANUAL_SELECTION;
         }
 
         if (originalBranch != null)
             manager.checkoutBranch(originalBranch);
 
-        return errorBlocks;
+
+        return new ImgMergeResult(errorBlocks, result);
+    }
+
+    private void print(Set<String> keySet) {
+        System.out.println("Conflict files found: ");
+        for (String k : keySet)
+            System.out.println("Conflict  :   " + k);
+    }
+
+    public boolean mergeConflictBlocks(V5FSWriter writer, String sourceBranch, String targetBranch, List<BlockConflictEntry> conflictsVote) throws IOException, GitAPIException {
+
+        Map<String, int[][]> conflicts = getConflicts(sourceBranch, targetBranch);
+        if (conflicts == null) {
+            System.out.println("No conflict");
+            mergeAndCommit(sourceBranch, targetBranch);
+            return true;
+        }
+
+        String originalBranch = checkAndCheckout(targetBranch);
+        String indexPath = writer.getIndexWriter().getBasePath();
+
+        RevCommit originCommit = getCommonAncestor(sourceBranch, targetBranch);
+        RevCommit branchSourceCommit = getLastCommit(sourceBranch);
+//                System.out.println(branchOneCommit.getFullMessage());
+//                System.out.println(branchOneCommit.getTree());
+        RevCommit branchTargetCommit = getLastCommit(targetBranch);
+
+        MultiVersionZarrReader readerBranchSource = new MultiVersionZarrReader(indexPath, branchSourceCommit);
+        MultiVersionZarrReader readerBranchTarget = new MultiVersionZarrReader(indexPath, branchTargetCommit);
+        MultiVersionZarrReader readerAncestor = new MultiVersionZarrReader(indexPath, originCommit);
+
+
+        for (String conflictFile : conflicts.keySet()) {
+            System.out.println("Conflict file: " + conflictFile);
+            Tuple<String, long[]> blockInfo = BlockConflictManager.formatFileInfo(conflictFile);
+            String dataset = blockInfo.getA();
+            long[] gridPosition = blockInfo.getB();
+
+            BlockConflictEntry vote = conflictsVote.stream().filter(e -> e.getGridPosition() == gridPosition).collect(Collectors.toList()).get(0);
+
+            DatasetAttributes datasetAttributes = readerAncestor.getDatasetAttributes(dataset);
+            DataBlock baseBlock = readerAncestor.readBlock(dataset, datasetAttributes, gridPosition);
+
+            DataBlock<?> deltaOne = BlockConflictManager.getDelta(readerAncestor, readerBranchSource, conflictFile);
+            DataBlock<?> deltaTwo = BlockConflictManager.getDelta(readerAncestor, readerBranchTarget, conflictFile);
+
+//            System.out.print("Delta 1:");
+//            Utils.printBlock(deltaOne);
+//            System.out.print("Delta 2:");
+//            Utils.printBlock(deltaTwo);
+
+            BlockMergeResult blockMergeResult = BlockConflictManager.mergeDeltas(deltaOne, deltaTwo);
+            DataBlock<?> block;
+            if (blockMergeResult.isSuccess()) {
+                block = blockMergeResult.getResultBlock();
+            } else {
+                block = BlockConflictManager.mergeDeltasUsingConflictVote(deltaOne, deltaTwo, vote.getSelectedBranch());
+            }
+//                System.out.println("success!");
+            DataBlock<?> resultBlock = BlockConflictManager.overwriteBlock(baseBlock, block);
+            writer.writeBlock(dataset, datasetAttributes, resultBlock);
+        }
+        manager.commitAll("merge " + sourceBranch);
+        System.out.println("Success, Block and Branches merged ! ");
+
+        if (originalBranch != null)
+            manager.checkoutBranch(originalBranch);
+
+        return true;
     }
 }

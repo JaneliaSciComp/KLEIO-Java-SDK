@@ -26,36 +26,30 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.indexes;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import org.janelia.saalfeldlab.n5.N5Reader;
-import org.janelia.saalfeldlab.n5.N5Writer;
-import org.janelia.scicomp.v5.lib.tools.SessionId;
-import org.janelia.scicomp.v5.lib.vc.V5VersionManager;
+public class MergeBranches {
+    final private String sourceBranch;
+    final private String targetBranch;
 
-import java.io.IOException;
-
-public interface V5IndexWriter<G extends V5VersionManager> extends N5Writer, N5Reader {
-
-    G getVersionManager();
-
-    UnsignedLongType getSession();
-
-    void setSession(UnsignedLongType session);
-
-    default UnsignedLongType incrementSession() throws IOException {
-        setSession(SessionId.getNextId());
-        return getSession();
+    public MergeBranches(String sourceBranch, String targetBranch) {
+        this.sourceBranch = sourceBranch;
+        this.targetBranch = targetBranch;
     }
 
-    //TODO change to version
-    default UnsignedLongType getCurrentSession() throws IOException {
-        if (getSession() == null)
-            return incrementSession();
-        return getSession();
+    public String getSourceBranch() {
+        return sourceBranch;
     }
 
-    void set(String dataset, long[] gridPosition) throws IOException;
+    public String getTargetBranch() {
+        return targetBranch;
+    }
 
+    @Override
+    public String toString() {
+        return "MergeBranches{" +
+                "sourceBranch='" + sourceBranch + '\'' +
+                ", targetBranch='" + targetBranch + '\'' +
+                '}';
+    }
 }
