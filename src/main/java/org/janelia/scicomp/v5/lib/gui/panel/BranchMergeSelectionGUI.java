@@ -26,54 +26,53 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc;
+package org.janelia.scicomp.v5.lib.gui.panel;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.MergeBranches;
 
-public abstract class V5VersionManager {
-    protected List<long[]> uncommittedBlocks = new ArrayList<>();
+import javax.swing.*;
 
-    protected String userID;
+public class BranchMergeSelectionGUI {
 
-    public String getUserID() {
-        return userID;
+    private final String[] branches;
+
+    public BranchMergeSelectionGUI(String[] branches) {
+        this.branches = branches;
+
     }
 
-    public List<long[]> getUncommittedBlocks() {
-        return uncommittedBlocks;
+    public static void main(String[] args) {
+        String s1[] = {"Jalpaiguri", "Mumbai", "Noida", "Kolkata", "New Delhi"};
+        MergeBranches mergeBranches = new BranchMergeSelectionGUI(s1).getBranches();
+        System.out.println(mergeBranches);
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public MergeBranches getBranches() {
+        String sourceBranch = (String) JOptionPane.showInputDialog(
+                null,
+                "Select Source branch: ",
+                "Source branch",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                branches,
+                branches[branches.length - 1]);
+
+        if (sourceBranch == null)
+            return null;
+
+        String targetBranch = (String) JOptionPane.showInputDialog(
+                null,
+                "Select Target branch: ",
+                "Target branch",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                branches,
+                branches[0]);
+
+        if (targetBranch == null)
+            return null;
+
+        return new MergeBranches(sourceBranch, targetBranch);
     }
-
-    //stage
-    public void addUncommittedBlock(long[] position) {
-        this.uncommittedBlocks.add(position);
-    }
-
-    public void resetUncommittedBlock() {
-        this.uncommittedBlocks.clear();
-    }
-
-
-    public abstract void commitAll(String message) throws IOException;
-
-    public abstract void commitBlocks() throws IOException;
-
-    public abstract void createNewBranch(String branchName) throws IOException;
-
-    public abstract void checkoutBranch(String branchName) throws IOException;
-
-    public abstract String getCurrentBranch() throws IOException;
-
-    public abstract Set<String> getUncommittedChanges() throws IOException;
-
-
-    public abstract Set<String> getUntrackedChanges() throws IOException;
-
-    public abstract String[] getBranches() throws IOException;
 }
+

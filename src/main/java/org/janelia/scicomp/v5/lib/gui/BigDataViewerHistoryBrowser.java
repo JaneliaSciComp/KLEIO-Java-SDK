@@ -28,6 +28,8 @@
 
 package org.janelia.scicomp.v5.lib.gui;
 
+import bdv.ui.BdvDefaultCards;
+import bdv.ui.CardPanel;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
@@ -43,29 +45,24 @@ import org.janelia.scicomp.v5.AbstractV5Reader;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSReader;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
-import org.janelia.scicomp.v5.lib.gui.panel.BDVMergePanel;
+import org.janelia.scicomp.v5.lib.gui.panel.BDVCommitsHistoryPanel;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 import org.janelia.scicomp.v5.lib.uri.V5URL;
 import org.janelia.scicomp.v5.lib.vc.GitUtils;
-import org.janelia.scicomp.v5.lib.vc.merge.entities.AbstractBranchMergeController;
-import org.janelia.scicomp.v5.lib.vc.merge.entities.BranchMergeController;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
-public class BigDataVersionsViewer {
+public class BigDataViewerHistoryBrowser {
 
-    private final V5FSReader writer;
-    private final String[] branches;
+    private final V5FSReader reader;
     private Bdv bdv = null;
     private final BdvOptions options;
-    private final BranchMergeController controller;
 
-    public BigDataVersionsViewer(V5FSWriter writer) throws IOException, GitAPIException {
-        this.writer = writer;
+    public BigDataViewerHistoryBrowser(V5FSReader reader) {
+        this.reader = reader;
         this.options = BdvOptions.options();
-        this.branches = new GitUtils(new File(writer.getIndexReader().getBasePath())).getBranchesNames();
-        this.controller = new BranchMergeController(writer);
     }
 
 
@@ -77,16 +74,10 @@ public class BigDataVersionsViewer {
         } else {
             img = N5Utils.openVolatile(n5, dataset);
         }
-        if (bdv == null) {
+        if (bdv == null)
             bdv = BdvFunctions.show(img, name, options);
-            setupBDV(bdv);
-        } else
+        else
             BdvFunctions.show(img, name, options.addTo(bdv));
-    }
-
-    private void setupBDV(Bdv bdv) {
-        BDVMergePanel mergePanel = new BDVMergePanel(branches, controller);
-        bdv.getBdvHandle().getCardPanel().addCard(mergePanel.getKey(), mergePanel.getTitle(), mergePanel, mergePanel.isExpend());
     }
 
     public void showRaw(N5Reader n5, String dataset) throws IOException {
@@ -95,30 +86,39 @@ public class BigDataVersionsViewer {
 
 
     public void show(String dataset) throws IOException, GitAPIException {
-        String indexPath = writer.getIndexReader().getBasePath();
-        N5FSReader rawReader = writer.getRawReader();
-        V5URL url = writer.getUrl();
+        String indexPath = reader.getIndexReader().getBasePath();
+        N5FSReader rawReader = reader.getRawReader();
+        V5URL url = reader.getUrl();
 
         GitUtils repo = new GitUtils(new File(indexPath));
 
-        for (String branchName : branches) {
+        for (Ref branch : repo.getBranches()) {
+            String branchName = branch.getName().replace("refs/", "");
 
-            RevCommit commit = repo.getLastCommitForBranch(repo.getBranch(branchName));
+            RevCommit commit = repo.getLastCommitForBranch(branch);
 
             AbstractV5Reader<MultiVersionZarrReader, N5FSReader> n5 = new AbstractV5Reader<>(new MultiVersionZarrReader(indexPath, commit), rawReader, url);
             showSource(n5, branchName, dataset);
         }
-//        BDVUtils.randomColor(bdv);
-//        bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get(0).setDisplayRange();
+        BDVCommitsHistoryPanel bdvCommitHistory = new BDVCommitsHistoryPanel();
+        final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
+        cardPanel.addCard(bdvCommitHistory.getTitle(),
+                bdvCommitHistory.getKey(),
+                bdvCommitHistory,bdvCommitHistory.isExpend(), new Insets(0, 4, 0, 0));
+        cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);
+        cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
+        cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
+        bdv.getBdvHandle().getViewerPanel().requestRepaint();
+        bdv.getBdvHandle().getSplitPanel().repaint();
     }
 
     public static void main(String[] args) throws IOException, GitAPIException {
         V5FSURL url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store\"}");
         V5FSReader raw = new V5FSReader(url);
         V5FSURL branches_url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/datastore\"}");
-        V5FSWriter branchesReader = new V5FSWriter(branches_url);
-        BigDataVersionsViewer bdv = new BigDataVersionsViewer(branchesReader);
-        bdv.showRaw(raw, "/volumes/crop129/labels/all");
+        V5FSWriter branches = new V5FSWriter(branches_url);
+        BigDataVersionsViewer bdv = new BigDataVersionsViewer(branches);
+        bdv.showRaw(raw,"/volumes/crop129/labels/all");
         bdv.show("annotation/data/s0");
     }
 

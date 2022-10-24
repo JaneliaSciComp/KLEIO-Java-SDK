@@ -44,13 +44,13 @@ public interface V5IndexWriter<G extends V5VersionManager> extends N5Writer, N5R
 
     void setSession(UnsignedLongType session);
 
-    default UnsignedLongType incrementSession() {
+    default UnsignedLongType incrementSession() throws IOException {
         setSession(SessionId.getNextId());
         return getSession();
     }
 
     //TODO change to version
-    default UnsignedLongType getCurrentSession() {
+    default UnsignedLongType getCurrentSession() throws IOException {
         if (getSession() == null)
             return incrementSession();
         return getSession();

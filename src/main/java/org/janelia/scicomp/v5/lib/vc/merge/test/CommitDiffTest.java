@@ -26,54 +26,31 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc;
+package org.janelia.scicomp.v5.lib.vc.merge.test;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.janelia.scicomp.v5.lib.vc.merge.BranchesMergeManager;
+
+import java.io.ByteArrayOutputStream;
 import java.util.List;
-import java.util.Set;
 
-public abstract class V5VersionManager {
-    protected List<long[]> uncommittedBlocks = new ArrayList<>();
+public class CommitDiffTest {
+    public static void main(String[] args) throws Exception {
+        String indexPath = "/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex";
+        BranchesMergeManager manager = new BranchesMergeManager(indexPath);
+        RevCommit originCommit = manager.getCommonAncestor("annotator_1", "annotator_2");
+        System.out.println(originCommit.getFullMessage());
 
-    protected String userID;
+        RevCommit newCommit = manager.getLastCommit("annotator_2");
+        System.out.println(newCommit.getName());
 
-    public String getUserID() {
-        return userID;
+        List<DiffEntry> entries = manager.getDifferences(originCommit,newCommit);
+
+
     }
-
-    public List<long[]> getUncommittedBlocks() {
-        return uncommittedBlocks;
-    }
-
-    public void setUserID(String userID) {
-        this.userID = userID;
-    }
-
-    //stage
-    public void addUncommittedBlock(long[] position) {
-        this.uncommittedBlocks.add(position);
-    }
-
-    public void resetUncommittedBlock() {
-        this.uncommittedBlocks.clear();
-    }
-
-
-    public abstract void commitAll(String message) throws IOException;
-
-    public abstract void commitBlocks() throws IOException;
-
-    public abstract void createNewBranch(String branchName) throws IOException;
-
-    public abstract void checkoutBranch(String branchName) throws IOException;
-
-    public abstract String getCurrentBranch() throws IOException;
-
-    public abstract Set<String> getUncommittedChanges() throws IOException;
-
-
-    public abstract Set<String> getUntrackedChanges() throws IOException;
-
-    public abstract String[] getBranches() throws IOException;
 }

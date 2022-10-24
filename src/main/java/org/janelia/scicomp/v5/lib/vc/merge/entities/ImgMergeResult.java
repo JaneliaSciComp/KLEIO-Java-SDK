@@ -26,54 +26,54 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-public abstract class V5VersionManager {
-    protected List<long[]> uncommittedBlocks = new ArrayList<>();
+public class ImgMergeResult {
 
-    protected String userID;
+    public enum Case {
+        NO_CONFLICT("Success: Merged without conflict"),
+        CONFLICT_MERGED("Success: Index conflicts but fixed"),
+        CONFLICT_NEED_MANUAL_SELECTION("ERROR: conflict need to be fixed manually");
 
-    public String getUserID() {
-        return userID;
+        private final String message;
+
+        public String getMessage() {
+            return message;
+        }
+
+        Case(String message) {
+            this.message = message;
+        }
     }
 
-    public List<long[]> getUncommittedBlocks() {
-        return uncommittedBlocks;
+    final List<BlockConflictEntry> conflicts;
+    final Case result;
+    public ImgMergeResult(List<BlockConflictEntry> conflicts, Case result) {
+        this.conflicts = conflicts;
+        this.result = result;
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public ImgMergeResult() {
+        this.result = null;
+        this.conflicts = new ArrayList<>();
     }
 
-    //stage
-    public void addUncommittedBlock(long[] position) {
-        this.uncommittedBlocks.add(position);
+    public ImgMergeResult(Case result) {
+        this.result = result;
+        this.conflicts = new ArrayList<>();
     }
 
-    public void resetUncommittedBlock() {
-        this.uncommittedBlocks.clear();
+    public List<BlockConflictEntry> getConflicts() {
+        return conflicts;
     }
 
+    public Case getResult() {
+        return result;
+    }
 
-    public abstract void commitAll(String message) throws IOException;
-
-    public abstract void commitBlocks() throws IOException;
-
-    public abstract void createNewBranch(String branchName) throws IOException;
-
-    public abstract void checkoutBranch(String branchName) throws IOException;
-
-    public abstract String getCurrentBranch() throws IOException;
-
-    public abstract Set<String> getUncommittedChanges() throws IOException;
-
-
-    public abstract Set<String> getUntrackedChanges() throws IOException;
-
-    public abstract String[] getBranches() throws IOException;
 }
+
+

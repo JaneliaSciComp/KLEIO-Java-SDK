@@ -30,6 +30,7 @@ package org.janelia.scicomp.v5.plugin;
 
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.scicomp.v5.fs.V5FSReader;
+import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.gui.BigDataVersionsViewer;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -58,7 +59,7 @@ class BDVShowAllBranches_Plugin implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        V5FSReader v5 = new V5FSReader(indexPath, rawPath);
+        V5FSWriter v5 = new V5FSWriter(indexPath, rawPath);
         BigDataVersionsViewer viewer = new BigDataVersionsViewer(v5);
         if (raw_path != null) {
             viewer.showRaw(new N5FSReader(rawPath), raw_dataset);

@@ -26,54 +26,35 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
+
+import org.janelia.scicomp.v5.fs.V5FSWriter;
+import org.janelia.scicomp.v5.lib.vc.merge.BranchesMergeManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
-public abstract class V5VersionManager {
-    protected List<long[]> uncommittedBlocks = new ArrayList<>();
+public class BranchMergeController implements AbstractBranchMergeController {
+    private final BranchesMergeManager manager;
+    private final V5FSWriter writer;
 
-    protected String userID;
-
-    public String getUserID() {
-        return userID;
+    public BranchMergeController(V5FSWriter writer) throws IOException {
+        String indexPath = writer.getIndexWriter().getBasePath();
+        this.manager = new BranchesMergeManager(indexPath);
+        this.writer = writer;
     }
 
-    public List<long[]> getUncommittedBlocks() {
-        return uncommittedBlocks;
+    @Override
+    public ImgMergeResult merge(MergeBranches mergeBranches) throws Exception {
+        return manager.mergeBlocks(writer, mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch());
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    @Override
+    public boolean mergeConflicts(MergeBranches mergeBranches, List<BlockConflictEntry> conflicts) throws Exception {
+        List<BlockConflictEntry> filteredConflicts = conflicts.stream().filter(e -> !e.isMerged()).collect(Collectors.toList());
+        if (!filteredConflicts.stream().filter(e-> e.getSelectedBranch() == 0).collect(Collectors.toList()).isEmpty())
+            throw new IOException("Select branch before !");
+        return manager.mergeConflictBlocks(writer,mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch(),filteredConflicts);
     }
-
-    //stage
-    public void addUncommittedBlock(long[] position) {
-        this.uncommittedBlocks.add(position);
-    }
-
-    public void resetUncommittedBlock() {
-        this.uncommittedBlocks.clear();
-    }
-
-
-    public abstract void commitAll(String message) throws IOException;
-
-    public abstract void commitBlocks() throws IOException;
-
-    public abstract void createNewBranch(String branchName) throws IOException;
-
-    public abstract void checkoutBranch(String branchName) throws IOException;
-
-    public abstract String getCurrentBranch() throws IOException;
-
-    public abstract Set<String> getUncommittedChanges() throws IOException;
-
-
-    public abstract Set<String> getUntrackedChanges() throws IOException;
-
-    public abstract String[] getBranches() throws IOException;
 }

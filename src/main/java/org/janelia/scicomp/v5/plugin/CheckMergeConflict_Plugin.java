@@ -69,7 +69,7 @@ class CheckMergeConflict_Plugin implements Callable<Integer> {
     }
 
     public static void main(String... args) {
-//        args = "-help".split(" ");
+        args = "-help".split(" ");
         int exitCode = new CommandLine(new CheckMergeConflict_Plugin()).execute(args);
         System.exit(exitCode);
     }

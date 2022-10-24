@@ -26,54 +26,30 @@
  *
  */
 
-package org.janelia.scicomp.v5.lib.vc;
+package org.janelia.scicomp.v5.lib.vc.merge.entities;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+public class MergeBranches {
+    final private String sourceBranch;
+    final private String targetBranch;
 
-public abstract class V5VersionManager {
-    protected List<long[]> uncommittedBlocks = new ArrayList<>();
-
-    protected String userID;
-
-    public String getUserID() {
-        return userID;
+    public MergeBranches(String sourceBranch, String targetBranch) {
+        this.sourceBranch = sourceBranch;
+        this.targetBranch = targetBranch;
     }
 
-    public List<long[]> getUncommittedBlocks() {
-        return uncommittedBlocks;
+    public String getSourceBranch() {
+        return sourceBranch;
     }
 
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public String getTargetBranch() {
+        return targetBranch;
     }
 
-    //stage
-    public void addUncommittedBlock(long[] position) {
-        this.uncommittedBlocks.add(position);
+    @Override
+    public String toString() {
+        return "MergeBranches{" +
+                "sourceBranch='" + sourceBranch + '\'' +
+                ", targetBranch='" + targetBranch + '\'' +
+                '}';
     }
-
-    public void resetUncommittedBlock() {
-        this.uncommittedBlocks.clear();
-    }
-
-
-    public abstract void commitAll(String message) throws IOException;
-
-    public abstract void commitBlocks() throws IOException;
-
-    public abstract void createNewBranch(String branchName) throws IOException;
-
-    public abstract void checkoutBranch(String branchName) throws IOException;
-
-    public abstract String getCurrentBranch() throws IOException;
-
-    public abstract Set<String> getUncommittedChanges() throws IOException;
-
-
-    public abstract Set<String> getUntrackedChanges() throws IOException;
-
-    public abstract String[] getBranches() throws IOException;
 }

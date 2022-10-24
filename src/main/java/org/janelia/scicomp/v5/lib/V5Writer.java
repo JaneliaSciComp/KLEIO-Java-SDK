@@ -50,6 +50,10 @@ public interface V5Writer<I extends V5IndexWriter, K extends N5Writer> extends N
         getIndexWriter().getVersionManager().createNewBranch(branchName);
     }
 
+    default String[] getBranches() throws IOException {
+        return getIndexWriter().getVersionManager().getBranches();
+    }
+
     default void checkoutBranch(String branchName) throws IOException {
         getIndexWriter().getVersionManager().checkoutBranch(branchName);
     }
@@ -66,11 +70,11 @@ public interface V5Writer<I extends V5IndexWriter, K extends N5Writer> extends N
        return getIndexWriter().getVersionManager().getCurrentBranch();
     }
 
-    default UnsignedLongType incrementSession() {
+    default UnsignedLongType incrementSession() throws IOException {
         return getIndexWriter().incrementSession();
     }
 
-    default UnsignedLongType getCurrentSession() {
+    default UnsignedLongType getCurrentSession() throws IOException {
         return getIndexWriter().getCurrentSession();
     }
 

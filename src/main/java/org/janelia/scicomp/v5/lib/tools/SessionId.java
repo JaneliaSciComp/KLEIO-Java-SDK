@@ -38,6 +38,7 @@ import net.imglib2.type.numeric.integer.UnsignedLongType;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SessionId {
@@ -45,18 +46,25 @@ public class SessionId {
 
     private static final String API_LINK = "http://c13u06.int.janelia.org:8000/v1/id";
 
-    public static UnsignedLongType getNextId() {
-        if(TESTING)
-            return new UnsignedLongType(ThreadLocalRandom.current().nextInt(10, 1000 ));
-        final ClientConfig clientConfig = new DefaultClientConfig();
-        final Client client = Client.create(clientConfig);
-        final WebResource webResource = client.resource(UriBuilder.fromUri(API_LINK).build());
+    public static UnsignedLongType getNextId() throws IOException {
+        try {
+            System.out.println("get next id");
+            if (TESTING)
+                return new UnsignedLongType(ThreadLocalRandom.current().nextInt(10, 1000));
+            final ClientConfig clientConfig = new DefaultClientConfig();
+            final Client client = Client.create(clientConfig);
+//        client.setReadTimeout(1000);
+            client.setConnectTimeout(1000);
+            final WebResource webResource = client.resource(UriBuilder.fromUri(API_LINK).build());
 
-        final String clientResponse = webResource.type(MediaType.APPLICATION_JSON).post(String.class);
-
-        UnsignedLongType newSessionId = SessionId.fromString(clientResponse);
-        System.out.println("New Session ID:  " + newSessionId);
-        return newSessionId;
+            final String clientResponse = webResource.type(MediaType.APPLICATION_JSON).post(String.class);
+            System.out.println(clientResponse);
+            UnsignedLongType newSessionId = SessionId.fromString(clientResponse);
+            System.out.println("New Session ID:  " + newSessionId);
+            return newSessionId;
+        }catch (Exception e){
+            throw new IOException("ERROR Get Version API - Check Connection or Service");
+        }
     }
 
     private static UnsignedLongType fromString(String response) {
@@ -66,7 +74,7 @@ public class SessionId {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println(getNextId());
     }
 }
