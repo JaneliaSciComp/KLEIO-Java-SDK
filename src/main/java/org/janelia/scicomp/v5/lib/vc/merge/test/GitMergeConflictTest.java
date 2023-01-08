@@ -32,13 +32,11 @@ import com.google.common.collect.Lists;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.janelia.saalfeldlab.n5.DataType;
 import org.janelia.saalfeldlab.n5.N5FSWriter;
 import org.janelia.saalfeldlab.n5.RawCompression;
-import org.janelia.saalfeldlab.n5.s3.N5AmazonS3Reader;
 import org.janelia.scicomp.v5.lib.tools.FileUtils;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 
@@ -46,7 +44,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class GitMergeConflictTest {

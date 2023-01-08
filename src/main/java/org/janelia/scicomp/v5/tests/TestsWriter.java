@@ -30,7 +30,7 @@ package org.janelia.scicomp.v5.tests;
 
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
-import net.imglib2.img.display.imagej.ImageJFunctions;
+//import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.janelia.saalfeldlab.n5.N5FSWriter;
@@ -86,7 +86,7 @@ public class TestsWriter {
                 System.out.println(key + ":" + att.get(key));
             }
             CachedCellImg<FloatType, ?> img = N5Utils.open(writer, s);
-            ImageJFunctions.show(img);
+//            ImageJFunctions.show(img);
         }
     }
 
@@ -103,7 +103,7 @@ public class TestsWriter {
                 System.out.println(key + ":" + att.get(key));
             }
             CachedCellImg<FloatType, ?> img = N5Utils.open(writer, s);
-            ImageJFunctions.show(img);
+//            ImageJFunctions.show(img);
         }
     }
 }

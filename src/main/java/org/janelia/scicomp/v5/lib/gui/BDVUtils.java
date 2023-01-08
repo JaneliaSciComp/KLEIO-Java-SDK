@@ -30,18 +30,9 @@ package org.janelia.scicomp.v5.lib.gui;
 
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.Bdv;
-import bdv.util.BdvStackSource;
-import bdv.viewer.Source;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.histogram.DiscreteFrequencyDistribution;
-import net.imglib2.histogram.Histogram1d;
-import net.imglib2.histogram.Real1dBinMapper;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.Views;
-import spim.fiji.spimdata.explorer.util.ColorStream;
 
 import java.util.Iterator;
 import java.util.List;

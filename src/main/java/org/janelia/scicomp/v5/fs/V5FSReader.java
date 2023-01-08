@@ -29,7 +29,7 @@ package org.janelia.scicomp.v5.fs;
 
 import com.google.gson.JsonElement;
 import net.imglib2.cache.img.CachedCellImg;
-import net.imglib2.img.display.imagej.ImageJFunctions;
+//import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.FloatType;
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
@@ -88,7 +88,7 @@ public class V5FSReader extends BasicV5Reader<N5ZarrReader, N5FSReader> {
                 System.out.println(key + ":" + att.get(key));
             }
             CachedCellImg<FloatType, ?> img = N5Utils.open(reader, s);
-            ImageJFunctions.show(img);
+//            ImageJFunctions.show(img);
         }
     }
 }
