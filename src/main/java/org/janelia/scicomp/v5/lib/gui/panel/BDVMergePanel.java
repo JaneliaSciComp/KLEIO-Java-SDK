@@ -6,9 +6,6 @@ import org.janelia.scicomp.v5.lib.vc.merge.entities.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,30 +13,6 @@ import java.util.List;
 public class BDVMergePanel extends BDVCardPanel {
     private final ConflictTableView table;
     private MergeBranches mergeBranches;
-
-//    public BDVMergePanel(List<ConflictBlockViewModel> conflicts) {
-//        super("Merge", "Merge", new GridBagLayout(), true);
-//        GridBagConstraints c = new GridBagConstraints();
-//        c.fill = GridBagConstraints.BOTH;
-//        c.weightx = 1;
-//        c.gridx = 0;
-//        c.gridy = 0;
-//        c.ipady = 20;
-//        JPanel headerPanel = new JPanel(new GridLayout(0,2));
-//
-//        JButton button = new JButton("Set All");
-//
-//
-//        add(headerPanel,c);
-//
-//        this.conflicts = conflicts;
-//        this.table = new ConflictTableView(this.conflicts);
-//        JScrollPane scrollFrame = new JScrollPane( this.table);
-//        c.gridx = 0;
-//        c.weighty = 1;
-//        c.gridy = 1;
-//        add(scrollFrame,c);
-//    }
 
     public BDVMergePanel(String[] branches, AbstractBranchMergeController controller) {
         super("Merge", "Merge", new GridBagLayout(), true);
@@ -77,7 +50,7 @@ public class BDVMergePanel extends BDVCardPanel {
         add(messageLabel, c);
 
         c.gridy = 4;
-        c.weighty = 1;
+        c.weighty = 0.6;
         add(scrollFrame, c);
         fixConflict.addActionListener(e -> {
             if (mergeBranches == null) {

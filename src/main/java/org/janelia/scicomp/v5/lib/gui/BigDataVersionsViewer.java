@@ -32,14 +32,15 @@ import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvOptions;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.label.LabelMultisetType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.AbstractV5Reader;
+import org.janelia.scicomp.v5.BasicV5Reader;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSReader;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
@@ -47,25 +48,31 @@ import org.janelia.scicomp.v5.lib.gui.panel.BDVMergePanel;
 import org.janelia.scicomp.v5.lib.uri.V5FSURL;
 import org.janelia.scicomp.v5.lib.uri.V5URL;
 import org.janelia.scicomp.v5.lib.vc.GitUtils;
-import org.janelia.scicomp.v5.lib.vc.merge.entities.AbstractBranchMergeController;
+import org.janelia.scicomp.v5.lib.vc.merge.entities.AbstractCallBack;
 import org.janelia.scicomp.v5.lib.vc.merge.entities.BranchMergeController;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class BigDataVersionsViewer {
+public class BigDataVersionsViewer<T extends NativeType<T>> implements AbstractCallBack<Boolean> {
 
     private final V5FSReader writer;
     private final String[] branches;
     private Bdv bdv = null;
     private final BdvOptions options;
     private final BranchMergeController controller;
+    private final List<BasicV5Reader<MultiVersionZarrReader, N5FSReader>> branchesReaders;
+    private final List<CachedCellImg<T, ?> > imgs;
 
     public BigDataVersionsViewer(V5FSWriter writer) throws IOException, GitAPIException {
         this.writer = writer;
         this.options = BdvOptions.options();
         this.branches = new GitUtils(new File(writer.getIndexReader().getBasePath())).getBranchesNames();
-        this.controller = new BranchMergeController(writer);
+        this.controller = new BranchMergeController(writer,this);
+        this.branchesReaders = new ArrayList<>();
+        this.imgs = new ArrayList<>();
     }
 
 
@@ -73,9 +80,12 @@ public class BigDataVersionsViewer {
         System.out.println("Showing: " + name);
         RandomAccessibleInterval<UnsignedShortType> img;
         if (LabelMultisetTypeConverter.isLabelMultisetType(n5, dataset)) {
-            img = LabelMultisetTypeConverter.convertVirtual(N5Utils.openVolatile(n5, dataset));
+            CachedCellImg<T, ?> imp = N5Utils.openVolatile(n5, dataset);
+           this.imgs.add(imp);
+            img = LabelMultisetTypeConverter.convertVirtual((RandomAccessibleInterval<LabelMultisetType>) imp);
         } else {
             img = N5Utils.openVolatile(n5, dataset);
+            this.imgs.add((CachedCellImg<T, ?>) img);
         }
         if (bdv == null) {
             bdv = BdvFunctions.show(img, name, options);
@@ -99,18 +109,22 @@ public class BigDataVersionsViewer {
         N5FSReader rawReader = writer.getRawReader();
         V5URL url = writer.getUrl();
 
-        GitUtils repo = new GitUtils(new File(indexPath));
-
         for (String branchName : branches) {
 
-            RevCommit commit = repo.getLastCommitForBranch(repo.getBranch(branchName));
 
-            AbstractV5Reader<MultiVersionZarrReader, N5FSReader> n5 = new AbstractV5Reader<>(new MultiVersionZarrReader(indexPath, commit), rawReader, url);
-            showSource(n5, branchName, dataset);
+            BasicV5Reader<MultiVersionZarrReader, N5FSReader> n5 = new BasicV5Reader<>(
+                    new MultiVersionZarrReader(indexPath, branchName),
+                    rawReader,
+                    url);
+
+            showSource(n5, n5.getIndexReader().getBranchName(), dataset);
+            branchesReaders.add(n5);
         }
+
 //        BDVUtils.randomColor(bdv);
 //        bdv.getBdvHandle().getSetupAssignments().getConverterSetups().get(0).setDisplayRange();
     }
+
 
     public static void main(String[] args) throws IOException, GitAPIException {
         V5FSURL url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/indexes\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/converted_data/data_store\"}");
@@ -123,4 +137,19 @@ public class BigDataVersionsViewer {
     }
 
 
+    @Override
+    public void call(Boolean aBoolean) throws Exception {
+        System.out.println("call back refresh");
+        branchesReaders.forEach(reader -> {
+            try {
+                reader.getIndexReader().updateCommit();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (GitAPIException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        this.imgs.forEach(e -> e.getCache().invalidateAll());
+
+    }
 }

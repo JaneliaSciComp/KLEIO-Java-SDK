@@ -44,6 +44,7 @@ import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.indexes.N5ZarrIndexWriter;
+import org.janelia.scicomp.v5.lib.tools.Utils;
 import org.janelia.scicomp.v5.lib.vc.GitV5VersionManger;
 import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockConflictEntry;
 import org.janelia.scicomp.v5.lib.vc.merge.entities.BlockMergeResult;
@@ -274,8 +275,6 @@ public class BranchesMergeManager {
             String dataset = blockInfo.getA();
             long[] gridPosition = blockInfo.getB();
 
-            BlockConflictEntry vote = conflictsVote.stream().filter(e -> e.getGridPosition() == gridPosition).collect(Collectors.toList()).get(0);
-
             DatasetAttributes datasetAttributes = readerAncestor.getDatasetAttributes(dataset);
             DataBlock baseBlock = readerAncestor.readBlock(dataset, datasetAttributes, gridPosition);
 
@@ -292,6 +291,12 @@ public class BranchesMergeManager {
             if (blockMergeResult.isSuccess()) {
                 block = blockMergeResult.getResultBlock();
             } else {
+                List<BlockConflictEntry> votes = conflictsVote.stream().filter(e -> Utils.isEqual(e.getGridPosition(),gridPosition)).collect(Collectors.toList());
+                if (votes.isEmpty()) {
+                    throw new IOException("Vote grid position " + Utils.format(gridPosition) + " not found!");
+                }
+
+                BlockConflictEntry vote = votes.get(0);
                 block = BlockConflictManager.mergeDeltasUsingConflictVote(deltaOne, deltaTwo, vote.getSelectedBranch());
             }
 //                System.out.println("success!");

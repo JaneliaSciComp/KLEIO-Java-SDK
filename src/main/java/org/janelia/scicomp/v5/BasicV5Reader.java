@@ -41,13 +41,13 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class AbstractV5Reader<I extends N5Reader, K extends N5Reader> implements V5Reader<I, K> {
+public class BasicV5Reader<I extends N5Reader, K extends N5Reader> implements V5Reader<I, K> {
 
     protected final I indexes;
     protected final K raw;
     protected final V5URL url;
 
-    public AbstractV5Reader(I indexReader, K rawReader, V5URL url) throws IOException {
+    public BasicV5Reader(I indexReader, K rawReader, V5URL url) throws IOException {
         this.indexes = indexReader;
         this.raw = rawReader;
         this.url = url;

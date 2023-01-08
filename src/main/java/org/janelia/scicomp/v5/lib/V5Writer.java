@@ -36,6 +36,7 @@ import org.janelia.scicomp.v5.lib.indexes.V5IndexWriter;
 import java.io.IOException;
 import java.util.Map;
 
+//TODO extends V5Reader<I, K>
 public interface V5Writer<I extends V5IndexWriter, K extends N5Writer> extends N5Writer {
 
     I getIndexWriter();
@@ -67,7 +68,7 @@ public interface V5Writer<I extends V5IndexWriter, K extends N5Writer> extends N
     }
 
     default String getCurrentBranch() throws IOException {
-       return getIndexWriter().getVersionManager().getCurrentBranch();
+        return getIndexWriter().getVersionManager().getCurrentBranch();
     }
 
     default UnsignedLongType incrementSession() throws IOException {

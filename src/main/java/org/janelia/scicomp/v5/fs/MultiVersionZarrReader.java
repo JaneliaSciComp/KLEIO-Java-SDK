@@ -30,14 +30,15 @@ package org.janelia.scicomp.v5.fs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.janelia.saalfeldlab.n5.DataBlock;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.GsonAttributesParser;
-import org.janelia.saalfeldlab.n5.N5FSReader;
-import org.janelia.saalfeldlab.n5.github.lib.LocalGitRepo;
 import org.janelia.saalfeldlab.n5.zarr.*;
+import org.janelia.scicomp.v5.lib.vc.GitUtils;
+import org.janelia.scicomp.v5.lib.vc.LocalGitRepo;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,10 +51,34 @@ import java.util.HashMap;
 
 public class MultiVersionZarrReader extends N5ZarrReader {
     private final LocalGitRepo repo;
+    private final String branchName;
+    private boolean updated = false;
+
+    public MultiVersionZarrReader(String basePath, String branchName) throws IOException, GitAPIException {
+        super(basePath);
+        this.branchName = branchName;
+        GitUtils gitUtils = new GitUtils(new File(basePath));
+        RevCommit commit = gitUtils.getLastCommitForBranch(gitUtils.getBranch(branchName));
+        this.repo = new LocalGitRepo(new File(basePath), commit);
+    }
 
     public MultiVersionZarrReader(String basePath, RevCommit commit) throws IOException {
         super(basePath);
+        this.branchName = commit.getName();
         this.repo = new LocalGitRepo(new File(basePath), commit);
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void updateCommit() throws IOException, GitAPIException {
+        this.updated = true;
+
+        System.out.println("Update commit : "+branchName);
+        GitUtils gitUtils = new GitUtils(new File(basePath));
+        RevCommit commit = gitUtils.getLastCommitForBranch(gitUtils.getBranch(branchName));
+        this.repo.setCommit(commit);
     }
 
     protected InputStream readGitObject(String objectKey) throws IOException {
@@ -97,6 +122,7 @@ public class MultiVersionZarrReader extends N5ZarrReader {
 
     @Override
     public DataBlock<?> readBlock(String pathName, DatasetAttributes datasetAttributes, long... gridPosition) throws IOException {
+        System.out.println(branchName+" --Updated: "+updated);
         ZarrDatasetAttributes zarrDatasetAttributes;
         if (datasetAttributes instanceof ZarrDatasetAttributes) {
             zarrDatasetAttributes = (ZarrDatasetAttributes) datasetAttributes;

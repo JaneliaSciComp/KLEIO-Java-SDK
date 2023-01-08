@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class SessionId {
-        private final static boolean TESTING = false;
+    public static boolean TESTING = false;
 
     private static final String API_LINK = "http://c13u06.int.janelia.org:8000/v1/id";
 

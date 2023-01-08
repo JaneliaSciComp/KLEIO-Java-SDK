@@ -31,6 +31,8 @@ package org.janelia.scicomp.v5;
 import org.janelia.saalfeldlab.n5.N5Writer;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
 import org.janelia.scicomp.v5.lib.tools.FileUtils;
+import org.janelia.scicomp.v5.lib.tools.SessionId;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -47,6 +49,7 @@ public class V5FSClonedTest extends V5FSMasterTest {
      */
     @Override
     protected N5Writer createN5Writer() throws IOException {
+        SessionId.TESTING = true;
         //Delete if existent
         FileUtils.forceDeleteAll(indexesTestDirPath, rawTestDirPath, clonedIndexesTestDirPath);
 
@@ -56,7 +59,16 @@ public class V5FSClonedTest extends V5FSMasterTest {
         return V5FSWriter.cloneFrom(masterWriter, clonedIndexesTestDirPath, username);
     }
 
-//    @Test
+    @Override
+    public void testGit() throws IOException {
+        V5FSWriter n5 = (V5FSWriter) createN5Writer();
+        String branch = n5.getIndexWriter().getVersionManager().getCurrentBranch();
+        System.out.println("Current branch: " + branch);
+        Assert.assertNotEquals( "master",branch);
+        checkGit();
+    }
+
+    //    @Test
 //    protected
 
 

@@ -37,11 +37,10 @@ import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.janelia.saalfeldlab.n5.N5FSReader;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.scicomp.v5.AbstractV5Reader;
+import org.janelia.scicomp.v5.BasicV5Reader;
 import org.janelia.scicomp.v5.fs.MultiVersionZarrReader;
 import org.janelia.scicomp.v5.fs.V5FSReader;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
@@ -95,16 +94,14 @@ public class BigDataViewerHistoryBrowser {
         for (Ref branch : repo.getBranches()) {
             String branchName = branch.getName().replace("refs/", "");
 
-            RevCommit commit = repo.getLastCommitForBranch(branch);
-
-            AbstractV5Reader<MultiVersionZarrReader, N5FSReader> n5 = new AbstractV5Reader<>(new MultiVersionZarrReader(indexPath, commit), rawReader, url);
+            BasicV5Reader<MultiVersionZarrReader, N5FSReader> n5 = new BasicV5Reader<>(new MultiVersionZarrReader(indexPath, branchName), rawReader, url);
             showSource(n5, branchName, dataset);
         }
         BDVCommitsHistoryPanel bdvCommitHistory = new BDVCommitsHistoryPanel();
         final CardPanel cardPanel = bdv.getBdvHandle().getCardPanel();
         cardPanel.addCard(bdvCommitHistory.getTitle(),
                 bdvCommitHistory.getKey(),
-                bdvCommitHistory,bdvCommitHistory.isExpend(), new Insets(0, 4, 0, 0));
+                bdvCommitHistory, bdvCommitHistory.isExpend(), new Insets(0, 4, 0, 0));
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_VIEWERMODES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCES_CARD, false);
         cardPanel.setCardExpanded(BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD, false);
@@ -118,7 +115,7 @@ public class BigDataViewerHistoryBrowser {
         V5FSURL branches_url = new V5FSURL("V5:{\"indexesPath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/versionedIndex\",\"keyValueStorePath\":\"/Users/zouinkhim/Desktop/Klio_presentation/data_multi_branch/annotation.v5/datastore\"}");
         V5FSWriter branches = new V5FSWriter(branches_url);
         BigDataVersionsViewer bdv = new BigDataVersionsViewer(branches);
-        bdv.showRaw(raw,"/volumes/crop129/labels/all");
+        bdv.showRaw(raw, "/volumes/crop129/labels/all");
         bdv.show("annotation/data/s0");
     }
 

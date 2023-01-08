@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class AbstractV5Writer<I extends N5ZarrIndexWriter, K extends N5FSWriter> extends AbstractV5Reader<I,K> implements V5Writer<I, K> {
+public class AbstractV5Writer<I extends N5ZarrIndexWriter, K extends N5FSWriter> extends BasicV5Reader<I,K> implements V5Writer<I, K> {
 
     public AbstractV5Writer(I indexesWriter, K rawWriter, V5URL url) throws IOException {
         super(indexesWriter,rawWriter,url);

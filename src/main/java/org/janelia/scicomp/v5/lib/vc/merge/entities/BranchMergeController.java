@@ -38,16 +38,22 @@ import java.util.stream.Collectors;
 public class BranchMergeController implements AbstractBranchMergeController {
     private final BranchesMergeManager manager;
     private final V5FSWriter writer;
+    private final AbstractCallBack callback;
 
-    public BranchMergeController(V5FSWriter writer) throws IOException {
+    public BranchMergeController(V5FSWriter writer,AbstractCallBack callback) throws IOException {
         String indexPath = writer.getIndexWriter().getBasePath();
         this.manager = new BranchesMergeManager(indexPath);
         this.writer = writer;
+        this.callback = callback;
     }
 
     @Override
     public ImgMergeResult merge(MergeBranches mergeBranches) throws Exception {
-        return manager.mergeBlocks(writer, mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch());
+        ImgMergeResult result = manager.mergeBlocks(writer, mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch());
+        if(!result.getResult().equals(ImgMergeResult.Case.CONFLICT_NEED_MANUAL_SELECTION)){
+            callback.call(null);
+        }
+        return result;
     }
 
     @Override
@@ -55,6 +61,10 @@ public class BranchMergeController implements AbstractBranchMergeController {
         List<BlockConflictEntry> filteredConflicts = conflicts.stream().filter(e -> !e.isMerged()).collect(Collectors.toList());
         if (!filteredConflicts.stream().filter(e-> e.getSelectedBranch() == 0).collect(Collectors.toList()).isEmpty())
             throw new IOException("Select branch before !");
-        return manager.mergeConflictBlocks(writer,mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch(),filteredConflicts);
+        boolean result = manager.mergeConflictBlocks(writer, mergeBranches.getSourceBranch(), mergeBranches.getTargetBranch(), filteredConflicts);
+        if(result){
+            callback.call(null);
+        }
+        return result;
     }
 }
