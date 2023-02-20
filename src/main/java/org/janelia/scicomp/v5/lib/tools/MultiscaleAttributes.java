@@ -28,14 +28,15 @@
 
 package org.janelia.scicomp.v5.lib.tools;
 
-import org.janelia.saalfeldlab.n5.*;
-import org.janelia.saalfeldlab.n5.ij.N5Importer;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
+import org.janelia.saalfeldlab.n5.N5FSReader;
+import org.janelia.saalfeldlab.n5.N5Reader;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 public class MultiscaleAttributes {
     final String dataset;
@@ -70,20 +71,26 @@ public class MultiscaleAttributes {
     public static List<MultiscaleAttributes> generateFromN5(N5Reader n5, String dataset) throws IOException {
         List<MultiscaleAttributes> result = new ArrayList<>();
 
-        N5DatasetDiscoverer parsers = new N5DatasetDiscoverer(n5,
-                Executors.newSingleThreadExecutor(),
-                Arrays.asList(N5Importer.GROUP_PARSERS),
-                Arrays.asList(N5Importer.PARSERS));
+//        N5DatasetDiscoverer parsers = new N5DatasetDiscoverer(n5,
+//                Executors.newSingleThreadExecutor(),
+//                Arrays.asList(N5Importer.GROUP_PARSERS),
+//                Arrays.asList(N5Importer.PARSERS));
 
         //TODO fix doesn't discover if main path is dataset
-        N5TreeNode root = parsers.discoverAndParseRecursive(dataset);
+//        N5TreeNode root = parsers.discoverAndParseRecursive(dataset);
 //        if(root.isDataset())
 //            result.add(new MultiscaleAttributes(dataset,t.getMetadata().getAttributes().getDimensions(), t.getMetadata().getAttributes().getBlockSize()))
 
-        for (N5TreeNode t : root.childrenList()) {
-            DatasetAttributes datasetAttributes = n5.getDatasetAttributes(t.getPath());
-            result.add(new MultiscaleAttributes(t.getPath(), datasetAttributes.getDimensions(), datasetAttributes.getBlockSize()));
+        String[] datasets = n5.deepList(dataset);
+        for(String d:datasets){
+            String path = new File(dataset, d).getPath();
+            DatasetAttributes datasetAttributes = n5.getDatasetAttributes(path);
+            result.add(new MultiscaleAttributes(path, datasetAttributes.getDimensions(), datasetAttributes.getBlockSize()));
         }
+//        for (N5TreeNode t : root.childrenList()) {
+//            DatasetAttributes datasetAttributes = n5.getDatasetAttributes(t.getPath());
+//            result.add(new MultiscaleAttributes(t.getPath(), datasetAttributes.getDimensions(), datasetAttributes.getBlockSize()));
+//        }
         return result;
     }
 
