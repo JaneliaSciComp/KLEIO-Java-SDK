@@ -37,6 +37,7 @@ import org.janelia.saalfeldlab.n5.N5FSWriter;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.scicomp.v5.fs.V5FSWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -49,8 +50,8 @@ public class TestsWriter {
     final static String username = "zouinkhim";
 
     public static void main(String[] args) throws Exception {
-//        convertN5ToVersioned();
-        cloneMaster();
+        convertN5ToVersioned();
+//        cloneMaster();
     }
 
 
@@ -80,12 +81,13 @@ public class TestsWriter {
 
         String[] resolutions = new String[]{"s0", "s1", "s2"};
         for (String s:resolutions){
-            HashMap<String, JsonElement> att = writer.getAttributes(s);
+            String path = new File(inputN5Dataset, s).getPath();
+            HashMap<String, JsonElement> att = writer.getAttributes(path);
 
             for (String key : att.keySet()) {
                 System.out.println(key + ":" + att.get(key));
             }
-            CachedCellImg<FloatType, ?> img = N5Utils.open(writer, s);
+            CachedCellImg<FloatType, ?> img = N5Utils.open(writer, path);
 //            ImageJFunctions.show(img);
         }
     }
