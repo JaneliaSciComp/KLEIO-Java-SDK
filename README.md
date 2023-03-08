@@ -5,14 +5,29 @@ Java implementation of Block based versioned data storage. Python implementation
 ----
 #### Proposed solution:
 To enable version management for nd data, a mix is created of:
-- Version block index using [Zarr](https://zarr.readthedocs.io/en/stable/) + [Git](https://git-scm.com/) 
-- A key value store: using [N5](https://github.com/saalfeldlab/n5) for now
+- Version block index using [Zarr](https://zarr.readthedocs.io/en/stable/) / [N5](https://github.com/saalfeldlab/n5) + [Git](https://git-scm.com/) 
+- A key value store: using [Zarr](https://zarr.readthedocs.io/en/stable/) / [N5](https://github.com/saalfeldlab/n5) for now
 
 
-![solution](img/architecture.jpg "Proposed solution")
+![solution](img/solution.png "Proposed solution")
 
-#### Class Diagram:
-![diagram](img/diagram.png "diagram")
+#### How to Use:
+Reader:
+```
+N5Reader reader = new KleioReader<>(new N5FSReader(INDEXES),new N5FSReader(RAW))
+```
+Writer: 
+```
+KleioWriter writer = new Kleio<>(new KleioN5FSIndexWriter(INDEXES),new N5Writer(RAW))
+# Commit
+writer.commit()
+# Create new Branch
+writer.createNewBranch(BRANCH_NAME)
+# Checkout Branch
+writer.checkoutBranch(BRANCH_NAME)
+# Push
+writer.push
+```
 
 
 ----
