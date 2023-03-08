@@ -28,14 +28,27 @@
 
 package org.janelia.scicomp.kleio;
 
-import org.janelia.scicomp.kleio.uri.V5URL;
+import org.janelia.saalfeldlab.n5.N5FSWriter;
+import org.janelia.scicomp.kleio.indexes.KleioN5FSIndexWriter;
+import org.janelia.scicomp.kleio.uri.KleioFSURL;
+
+import java.io.IOException;
 
 public class KleioFactory {
-    public static KleioReader createReader(V5URL url){
-        return null;
+    public static KleioReader createReader(KleioFSURL url) throws IOException {
+        return new KleioReader(new N5FSWriter(url.getIndexesPath()),new N5FSWriter(url.getKeyValueStorePath()));
     }
 
-    public static KleioWriter createWriter(V5URL url){
-        return null;
+    public static KleioWriter createWriter(KleioFSURL url) throws IOException {
+        return new KleioWriter(new KleioN5FSIndexWriter(url.getIndexesPath()),new N5FSWriter(url.getKeyValueStorePath()));
+
+    }
+
+    public static KleioWriter createWriter(String uri) throws IOException {
+        return createWriter(new KleioFSURL(uri));
+    }
+
+    public static KleioReader createReader(String uri) throws IOException {
+        return createReader(new KleioFSURL(uri));
     }
 }

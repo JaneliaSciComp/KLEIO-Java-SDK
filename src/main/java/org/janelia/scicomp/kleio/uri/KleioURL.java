@@ -29,10 +29,10 @@
 package org.janelia.scicomp.kleio.uri;
 
 
-public interface V5URL {
-    public static final String PREFIX = "V5:";
+public interface KleioURL {
+    public static final String PREFIX = "KLEIO:";
 
     public String getURL();
 
-    V5URL forDataset( String dataset);
+    KleioURL forDataset( String dataset);
 }

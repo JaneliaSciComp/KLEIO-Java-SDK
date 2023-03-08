@@ -34,21 +34,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class V5FSURL implements V5URL {
+public class KleioFSURL implements KleioURL {
     private final String indexesPath;
     private final String keyValueStorePath;
 
-    public V5FSURL(String indexesPath, String keyValueStorePath) {
+    public KleioFSURL(String indexesPath, String keyValueStorePath) {
         this.indexesPath = indexesPath;
         this.keyValueStorePath = keyValueStorePath;
     }
 
-    public V5FSURL(String uri) throws IOException {
+    public KleioFSURL(String uri) throws IOException {
         if (!uri.startsWith(PREFIX))
             throw new IOException("Invalid V5 URI: " + uri);
         try {
             uri = uri.substring(PREFIX.length());
-            V5FSURL v5uri = new Gson().fromJson(uri, V5FSURL.class);
+            KleioFSURL v5uri = new Gson().fromJson(uri, KleioFSURL.class);
             this.indexesPath = v5uri.getIndexesPath();
             this.keyValueStorePath = v5uri.getKeyValueStorePath();
         } catch (Exception e) {
@@ -56,9 +56,9 @@ public class V5FSURL implements V5URL {
         }
     }
 
-    public static boolean isV5(String url) {
+    public static boolean isKleio(String url) {
         try {
-            new V5FSURL(url);
+            new KleioFSURL(url);
             return true;
         } catch (Exception e) {
             return false;
@@ -75,7 +75,7 @@ public class V5FSURL implements V5URL {
 
     @Deprecated
     public static String format(String indexesPath, String keyValueStorePath) {
-        return new V5FSURL(indexesPath, keyValueStorePath).getURL();
+        return new KleioFSURL(indexesPath, keyValueStorePath).getURL();
     }
 
     @Override
@@ -84,10 +84,10 @@ public class V5FSURL implements V5URL {
     }
 
     @Override
-    public V5FSURL forDataset(String dataset) {
+    public KleioFSURL forDataset(String dataset) {
         Path newIndexesPath = Paths.get(indexesPath, dataset);
         Path newKeyValueStorePath = Paths.get(keyValueStorePath, dataset);
-        return new V5FSURL(newIndexesPath.toString(),newKeyValueStorePath.toString());
+        return new KleioFSURL(newIndexesPath.toString(),newKeyValueStorePath.toString());
     }
 
     @Deprecated
@@ -101,10 +101,10 @@ public class V5FSURL implements V5URL {
     }
 
     public static void main(String[] args) throws IOException {
-        V5FSURL v5URI1 = new V5FSURL("Z:\\jonesa\\versioned_data\\jrc_mus-kidney\\versionedIndex", "Z:\\jonesa\\versioned_data\\jrc_mus-kidney\\datastore");
+        KleioFSURL v5URI1 = new KleioFSURL("Z:\\jonesa\\versioned_data\\jrc_mus-kidney\\versionedIndex", "Z:\\jonesa\\versioned_data\\jrc_mus-kidney\\datastore");
         String uri = v5URI1.getURL();
         System.out.println(uri);
-        V5FSURL v5URI2 = new V5FSURL(uri);
+        KleioFSURL v5URI2 = new KleioFSURL(uri);
         System.out.println(v5URI2.getIndexesPath());
     }
 }

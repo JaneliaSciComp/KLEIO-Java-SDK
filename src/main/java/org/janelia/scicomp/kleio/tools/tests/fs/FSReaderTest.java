@@ -46,7 +46,7 @@ import java.util.HashMap;
 
 
 //TODO add overwrite annotation
-public class V5FSReader {
+public class FSReaderTest {
 
 
     public static void main(String[] args) throws Exception {
